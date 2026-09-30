@@ -75,7 +75,7 @@
     var st = this.stats();
     var g = R.generate(this.d, c, st.luck, lot.seed);
     var peek = R.peekCells(c, lot.seed, c.peekTiles + st.peekBonus);
-    var auction = c.sale === "auction" ? R.auctionSetup(this.d, c, g, lot.seed) : null;
+    var auction = c.sale === "auction" ? R.auctionSetup(this.d, c, g, lot.seed, st.luck) : null;
     return { container: c, gen: g, peek: peek, basePeek: c.peekTiles, auction: auction };
   };
 
@@ -155,6 +155,11 @@
     b.log.unshift({ who: i, amount: nxt });
     this.emit("bid", { who: i, amount: nxt });
     return "raised";
+  };
+
+  /* A save taken while the room was answering your bid: let the room answer now. */
+  Game.prototype.resumeBidding = function () {
+    if (this.s.bidding && this.s.bidding.holder === "you") this.rivalTurn();
   };
 
   Game.prototype.winBidding = function () {
@@ -373,8 +378,9 @@
         newlyCompleted.push(col);
       }
     });
+    var bought = cur.price > 0;
     this.s.current = null;
-    if (filed.length) this.contractProgress("file", { count: filed.length });
+    if (filed.length && bought) this.contractProgress("file", { count: filed.length });
     this.emit("finished", { sold: sold, filed: filed, completed: newlyCompleted });
     this.save();
     return { sold: sold, filed: filed, completed: newlyCompleted };
@@ -518,6 +524,7 @@
       this.s = s;
       if (!this.s.lots || !this.s.lots.length) this.refreshLots();
       this.fillContracts();
+      this.resumeBidding();
       return true;
     } catch (e) { return false; }
   };

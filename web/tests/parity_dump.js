@@ -21,11 +21,11 @@ for (const c of d.containers) {
 }
 out.auctions = [];
 for (const c of d.containers.filter(c => c.price > 0)) {
-  for (const seed of [3, 77, 123456789, 4000000000]) {
-    const g = R.generate(d, c, 0, seed);
-    const a = R.auctionSetup(d, c, g, seed);
+  for (const [seed, luck] of [[3, 0], [77, 0], [123456789, 5], [4000000000, 9]]) {
+    const g = R.generate(d, c, luck, seed);
+    const a = R.auctionSetup(d, c, g, seed, luck);
     const outcomes = [0.5, 0.9, 1.0, 1.2, 2.0].map(w => R.auctionOutcome(a, c.price * w));
-    out.auctions.push({ c: c.id, seed, setup: a, outcomes, peek: R.peekCells(c, seed, 5), nice: R.niceRound(c.price * 0.08) });
+    out.auctions.push({ c: c.id, seed, luck, setup: a, outcomes, peek: R.peekCells(c, seed, 5), nice: R.niceRound(c.price * 0.08) });
   }
 }
 out.ev = {};

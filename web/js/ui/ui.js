@@ -171,6 +171,8 @@
   // ------------------------------------------------------------------ stage: auction
   UI.prototype.renderStage = function () {
     if (this.stopScrape) this.stopScrape();
+    (this.doorTimers || []).forEach(clearTimeout);
+    this.doorTimers = [];
     this.stage.innerHTML = "";
     if (this.g.s.current) this.renderYard();
     else if (this.g.s.bidding) this.renderBidding();
@@ -431,6 +433,10 @@
    * the contents were decided when the lot was generated. */
   UI.prototype.doorBeat = function (c) {
     var self = this, grid = this.gridEl;
+    if (this.pendingHammer != null) {
+      this.banner("SOLD!", "to you for " + money(this.pendingHammer), "#ffae42");
+      this.pendingHammer = null;
+    }
     if (root.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     var doors = h("div", { class: "doors", style: "--c:" + TIER_COLORS[c.tier] }, [
       h("div", { class: "door l" }, [h("span", { class: "bar" }), h("span", { class: "bar" })]),
@@ -438,12 +444,9 @@
       h("div", { class: "sweep" })
     ]);
     grid.appendChild(doors);
-    if (this.pendingHammer != null) {
-      this.banner("SOLD!", "to you for " + money(this.pendingHammer), "#ffae42");
-      this.pendingHammer = null;
-    }
-    var open = setTimeout(function () { doors.classList.add("open"); A.doors(); }, 350);
+    var open = setTimeout(function () { if (doors.isConnected) { doors.classList.add("open"); A.doors(); } }, 350);
     var gone = setTimeout(function () { doors.remove(); }, 1700);
+    this.doorTimers = [open, gone];
     doors.addEventListener("pointerdown", function () { clearTimeout(open); clearTimeout(gone); doors.remove(); });
   };
 
@@ -748,7 +751,8 @@
       (function step(now) {
         var k = Math.min(1, (now - t0) / 700), e = 1 - Math.pow(1 - k, 3);
         vals[1].textContent = money(targets[1] * e);
-        vals[2].textContent = (targets[2] >= 0 ? "+" : "") + money(targets[1] * e - targets[0]);
+        var shown = targets[1] * e - targets[0];
+        vals[2].textContent = (shown >= 0 ? "+" : "") + money(shown);
         if (k < 1) requestAnimationFrame(step);
         else { vals[2].textContent = (profit >= 0 ? "+" : "") + money(profit); }
       })(t0);

@@ -237,13 +237,16 @@ def _normal(rng):
     return (rng.next() + rng.next() + rng.next() - 1.5) * 2.0
 
 
-def auction_setup(data, container, gen, seed):
-    """Opening bid, increment and each rival's private maximum for one lot."""
+def auction_setup(data, container, gen, seed, luck=0):
+    """Opening bid, increment and each rival's private maximum for one lot.
+
+    The door-crack signal is measured against the average for lots generated at the same
+    luck, so a luckier player's lots don't make rivals bid more on average."""
     a = data.auction
     guide = container["price"]
     tiles = container["cols"] * container["rows"]
     base = peek_cells(container, seed, container["peekTiles"])
-    avg_tile = expected_value(data, container["id"], 0) / tiles
+    avg_tile = expected_value(data, container["id"], luck) / tiles
     seen = 0.0
     for cell in base:
         it = gen["items"][gen["cells"][cell]]

@@ -172,7 +172,7 @@ class Run:
             if paid > 0 and c["sale"] == "auction":
                 # Bid at auction up to (a little over) expected value; walk away otherwise.
                 a = self.d.auction
-                setup = auction_setup(self.d, c, g, seed)
+                setup = auction_setup(self.d, c, g, seed, s["luck"])
                 value = expected_value(self.d, c["id"], s["luck"]) * s["sellTotal"]
                 won, price = auction_outcome(setup, min(self.money, value * a["simOverbid"]))
                 self.t += a["simSecondsPerLot"] / self.human_speed
@@ -208,14 +208,13 @@ class Run:
             if paid > 0:
                 bonus += self.contract_event("open_class", container=c["id"])
                 bonus += self.contract_event("profit", profit=found + kept_value - paid)
-            if filed:
+            if filed and paid > 0:
                 bonus += self.contract_event("file", count=filed)
             self.contract_income += bonus
-            found += bonus
             crew = crew_income_per_sec(self.d, s) * dt
             self.t += dt
-            self.money += found + crew
-            self.lifetime += found + crew
+            self.money += found + bonus + crew
+            self.lifetime += found + bonus + crew
             self.containers_opened[c["id"]] = self.containers_opened.get(c["id"], 0) + 1
             if paid > 0:
                 # Same definition as the in-game tally: kept items count at their value.

@@ -1,6 +1,6 @@
 {
   "auction": {
-    "comment": "Opening bid and increment are fractions of the guide price, rounded to 2 significant figures. Rivals see the container's base door-crack tiles (not the player's extra Door Crack tiles). signal = clamp((value per peeked tile / average value per tile - 1) * signalScale). Rival max = guide * mult * (1 + signalWeight * signal) * max(0.3, 1 + spread * z), z ~ N(0,1). simSecondsPerLot / simOverbid: simulator only — time spent bidding on one lot, and how far above expected value the simulated player will bid.",
+    "comment": "Opening bid and increment are fractions of the guide price, rounded to 2 significant figures. Rivals see only the container's base door-crack tiles (never the player's extra Door Crack tiles, cash or upgrades). signal = clamp((value per peeked tile / average value per tile for lots at the same luck - 1) * signalScale), so on average rivals bid the same whatever the player's upgrades. Rival max = guide * mult * (1 + signalWeight * signal) * max(0.3, 1 + spread * z), z ~ N(0,1). simSecondsPerLot / simOverbid: simulator only (time spent bidding on one lot; how far above expected value the simulated player bids).",
     "openingRatio": 0.4,
     "incrementRatio": 0.08,
     "minRivals": 1,

@@ -42,8 +42,8 @@ class ParityTest(unittest.TestCase):
     def test_auctions_match(self):
         for a in self.js["auctions"]:
             c = self.d.container_by_id[a["c"]]
-            g = generate(self.d, c, 0, a["seed"])
-            setup = auction_setup(self.d, c, g, a["seed"])
+            g = generate(self.d, c, a["luck"], a["seed"])
+            setup = auction_setup(self.d, c, g, a["seed"], a["luck"])
             self.assertEqual(peek_cells(c, a["seed"], 5), a["peek"])
             self.assertEqual(nice_round(c["price"] * 0.08), a["nice"])
             self.assertEqual(setup, a["setup"], a)

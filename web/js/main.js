@@ -14,7 +14,7 @@
 
   function start(hotData) {
     var game = new DS.Game(root.DOCKSIDE_DATA, { storage: safeStorage() });
-    if (hotData && hotData.state) game.s = hotData.state;
+    if (hotData && hotData.state) { game.s = hotData.state; game.resumeBidding(); }
     else game.load();
     var ui = new DS.UI(game, document.getElementById("app"));
     ui.loop();

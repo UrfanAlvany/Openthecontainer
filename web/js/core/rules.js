@@ -184,10 +184,10 @@
 
   function normal(rng) { return (rng.next() + rng.next() + rng.next() - 1.5) * 2.0; }
 
-  function auctionSetup(d, container, gen, seed) {
+  function auctionSetup(d, container, gen, seed, luck) {
     var a = d.auction, guide = container.price, tiles = container.cols * container.rows;
     var base = peekCells(container, seed, container.peekTiles);
-    var avgTile = expectedValue(d, container.id, 0) / tiles;
+    var avgTile = expectedValue(d, container.id, luck || 0) / tiles;
     var seen = 0;
     for (var i = 0; i < base.length; i++) {
       var it = gen.items[gen.cells[base[i]]];

@@ -187,4 +187,50 @@ test("contracts: always two on offer; completing one pays its fixed reward and r
   g.s.contracts.forEach(c => assert.ok(c.progress < c.n));
 });
 
+test("a save taken while the room is answering your bid resumes cleanly", () => {
+  const store = {};
+  const storage = { setItem: (k, v) => { store[k] = v; }, getItem: k => store[k] || null, removeItem: k => { delete store[k]; } };
+  const g = new Game(raw, { seed: 21, storage });
+  g.s.money = 1e6;
+  g.buyUpgrade("license");
+  g.openBidding(g.s.lots.findIndex(l => l.containerId === "standard"));
+  assert.ok(g.playerBid());
+  g.save();                                   // tab killed before rivalTurn
+  const h = new Game(raw, { seed: 22, storage });
+  assert.ok(h.load());
+  assert.ok(!h.s.bidding || h.s.bidding.holder !== "you", "stuck holding the bid after reload");
+});
+
+test("free scrap piles never advance or pay contracts", () => {
+  const g = new Game(raw, { seed: 8 });
+  g.s.contracts = [{ tpl: "curator", progress: 0, n: 1, classId: "rusty", amount: 0, reward: 999 }];
+  g.s.money = 0;
+  assert.ok(g.takeScrapPile());
+  scrapeAll(g);
+  g.s.current.itemState.forEach(st => { st.kept = false; });
+  // Force a collection filing from the pile.
+  const cur = g.s.current;
+  const idx = cur.gen.items.findIndex(it => raw.collections.collections.some(c => c.items.includes(it.id)));
+  if (idx >= 0) cur.itemState[idx].kept = true;
+  const before = g.s.money;
+  g.finishContainer();
+  assert.ok(g.s.contracts.some(c => c.tpl === "curator" && c.progress === 0));
+  assert.ok(g.s.money - before < 999);
+});
+
+test("rivals bid the same on average whatever the player's luck", () => {
+  const R = require("../js/core/rules.js");
+  const d = R.indexData(raw), c = d.containerById.standard;
+  const mean = luck => {
+    let t = 0, n = 0;
+    for (let seed = 1; seed < 1500; seed++) {
+      const a = R.auctionSetup(d, c, R.generate(d, c, luck, seed), seed, luck);
+      a.rivals.forEach(r => { t += r.max; n++; });
+    }
+    return t / n;
+  };
+  const m0 = mean(0), m8 = mean(8);
+  assert.ok(Math.abs(m8 / m0 - 1) < 0.03, `luck changed average rival limit by ${((m8 / m0 - 1) * 100).toFixed(1)}%`);
+});
+
 console.log(`\n${passed} tests passed`);
