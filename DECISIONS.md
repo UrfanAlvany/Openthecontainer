@@ -53,3 +53,34 @@ moving; Urfan can overrule at any time), **Superseded**.
   a set missing one piece). Outcomes are never rigged to look close.
 - **Why:** Rigged near-misses are what players and regulators call manipulative; honest
   ones produce the same excitement without the backlash.
+
+### D-007 — Bidding against readable rivals is the core differentiator
+- **Date:** 2026-09-30 · **By:** Claude (from Phase 0 research) · **Status:** Working
+- **What:** Rival NPC bidders with names, personalities, visible tells and consistent
+  logic, with no hidden random caps and no scaling with the player's upgrades. Built in Phase 3. The
+  Phase 2 prototype uses peek-and-buy at a listed price to prove the scrape/reveal loop first.
+- **Why:** The market leader (Storage Hunter Simulator) is most criticised for bidding that
+  feels rigged and random. Skill-based bidding also makes near-misses honest and lowers
+  gambling-rating risk. See RESEARCH.md, principles 3–4.
+- **Refines:** D-005(a).
+
+### D-008 — Show Paid / Found / Profit on every container; scale fanfare to profit
+- **Date:** 2026-09-30 · **By:** Claude (from Phase 0 research) · **Status:** Working
+- **What:** Every opened container ends with a tally card: price paid, value found, profit.
+  Celebration size follows profit and rarity; a loss gets a comic "dud" beat, never a win sound.
+- **Why:** Avoids "losses disguised as wins" (Dixon et al. 2010) and gives clips a
+  two-second readable punchline. RESEARCH.md principles 2 and 5.
+
+### D-009 — Publish the odds
+- **Date:** 2026-09-30 · **By:** Claude (from Phase 0 research) · **Status:** Working
+- **What:** Rarity odds per container class are visible in-game. Outcomes are resolved
+  before any animation plays.
+- **Why:** Answers "rigged" accusations before they start; consistent with D-006.
+
+### D-010 — Proposed commercial targets (needs Urfan)
+- **Date:** 2026-09-30 · **By:** Claude (proposal) · **Status:** Proposed — awaiting Urfan
+- **What:** Price $6.99–$7.99. Web demo first; Steam page live in autumn 2026; Steam demo
+  out >1 month before **June 2027 Next Fest** (14–21 June; register by ~25 April). Aim for
+  10K+ wishlists before the fest. Main arc 5–7 h, completion 15–20 h.
+- **Why:** Under-$10 games convert better (0.17× vs 0.10× wishlists); October 2026 Next
+  Fest registration has closed; pre-fest wishlists are the strongest predictor of results.
