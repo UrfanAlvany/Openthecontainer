@@ -12,7 +12,8 @@
     2
    ],
    "icon": "📦",
-   "flavor": "Smells like 1997."
+   "flavor": "Smells like 1997.",
+   "art": "cardboard-box"
   },
   {
    "id": "broken_lamp",
@@ -26,7 +27,8 @@
     2
    ],
    "icon": "💡",
-   "flavor": "Still flickers if you believe."
+   "flavor": "Still flickers if you believe.",
+   "art": "desk-lamp"
   },
   {
    "id": "rubber_duck",
@@ -40,7 +42,8 @@
     2
    ],
    "icon": "🦆",
-   "flavor": "Squeaks. Worth it."
+   "flavor": "Squeaks. Worth it.",
+   "art": "duck"
   },
   {
    "id": "vhs_tape",
@@ -54,7 +57,8 @@
     2
    ],
    "icon": "📼",
-   "flavor": "Could be anything. It's a wedding."
+   "flavor": "Could be anything. It's a wedding.",
+   "art": "vhs"
   },
   {
    "id": "tangled_cables",
@@ -68,7 +72,8 @@
     2
    ],
    "icon": "🔌",
-   "flavor": "Every charger ever made."
+   "flavor": "Every charger ever made.",
+   "art": "plug"
   },
   {
    "id": "old_tire",
@@ -82,7 +87,8 @@
     2
    ],
    "icon": "🛞",
-   "flavor": "Bald as a billiard ball."
+   "flavor": "Bald as a billiard ball.",
+   "art": "car-wheel"
   },
   {
    "id": "plastic_chair",
@@ -96,7 +102,8 @@
     2
    ],
    "icon": "🪑",
-   "flavor": "Structurally optimistic."
+   "flavor": "Structurally optimistic.",
+   "art": "wooden-chair"
   },
   {
    "id": "toaster",
@@ -110,7 +117,8 @@
     2
    ],
    "icon": "🍞",
-   "flavor": "Two slots. One works."
+   "flavor": "Two slots. One works.",
+   "art": "toaster"
   },
   {
    "id": "kettle",
@@ -124,7 +132,8 @@
     2
    ],
    "icon": "🫖",
-   "flavor": "Limescale edition."
+   "flavor": "Limescale edition.",
+   "art": "teapot"
   },
   {
    "id": "vinyl_record",
@@ -138,7 +147,8 @@
     2
    ],
    "icon": "💿",
-   "flavor": "Side B is better."
+   "flavor": "Side B is better.",
+   "art": "compact-disc"
   },
   {
    "id": "microwave",
@@ -152,7 +162,8 @@
     2
    ],
    "icon": "📟",
-   "flavor": "The light still comes on."
+   "flavor": "The light still comes on.",
+   "art": "chicken-oven"
   },
   {
    "id": "guitar",
@@ -166,7 +177,8 @@
     2
    ],
    "icon": "🎸",
-   "flavor": "Missing one string. Wonderwall-ready."
+   "flavor": "Missing one string. Wonderwall-ready.",
+   "art": "guitar"
   },
   {
    "id": "bicycle",
@@ -180,7 +192,8 @@
     2
    ],
    "icon": "🚲",
-   "flavor": "Needs air. And a chain."
+   "flavor": "Needs air. And a chain.",
+   "art": "dutch-bike"
   },
   {
    "id": "vintage_radio",
@@ -194,7 +207,8 @@
     2
    ],
    "icon": "📻",
-   "flavor": "Picks up a station from 1974."
+   "flavor": "Picks up a station from 1974.",
+   "art": "pocket-radio"
   },
   {
    "id": "game_console",
@@ -208,7 +222,8 @@
     2
    ],
    "icon": "🎮",
-   "flavor": "Cartridge still inside."
+   "flavor": "Cartridge still inside.",
+   "art": "game-console"
   },
   {
    "id": "designer_bag",
@@ -222,7 +237,8 @@
     2
    ],
    "icon": "👜",
-   "flavor": "The stitching says real."
+   "flavor": "The stitching says real.",
+   "art": "shopping-bag"
   },
   {
    "id": "antique_clock",
@@ -236,7 +252,8 @@
     2
    ],
    "icon": "🕰️",
-   "flavor": "Ticks twice, then thinks about it."
+   "flavor": "Ticks twice, then thinks about it.",
+   "art": "cuckoo-clock"
   },
   {
    "id": "signed_baseball",
@@ -250,7 +267,8 @@
     2
    ],
    "icon": "⚾",
-   "flavor": "The signature checks out."
+   "flavor": "The signature checks out.",
+   "art": "baseball-glove"
   },
   {
    "id": "silver_teaset",
@@ -264,7 +282,8 @@
     2
    ],
    "icon": "🍵",
-   "flavor": "Hallmarked. Grandma knew."
+   "flavor": "Hallmarked. Grandma knew.",
+   "art": "coffee-cup"
   },
   {
    "id": "gold_pocket_watch",
@@ -278,7 +297,8 @@
     2
    ],
    "icon": "⌚",
-   "flavor": "Engraved: 'For 40 years of service'."
+   "flavor": "Engraved: 'For 40 years of service'.",
+   "art": "pocket-watch"
   },
   {
    "id": "comic_no1",
@@ -292,7 +312,8 @@
     2
    ],
    "icon": "📚",
-   "flavor": "Bagged, boarded, never read."
+   "flavor": "Bagged, boarded, never read.",
+   "art": "book-cover"
   },
   {
    "id": "broken_tv",
@@ -306,7 +327,8 @@
     3
    ],
    "icon": "📺",
-   "flavor": "Makes a noise when you look at it."
+   "flavor": "Makes a noise when you look at it.",
+   "art": "tv"
   },
   {
    "id": "rusty_toolbox",
@@ -320,7 +342,8 @@
     3
    ],
    "icon": "🧰",
-   "flavor": "Contains one (1) screw."
+   "flavor": "Contains one (1) screw.",
+   "art": "toolbox"
   },
   {
    "id": "mannequin",
@@ -334,7 +357,8 @@
     3
    ],
    "icon": "🧍",
-   "flavor": "Watching. Always watching."
+   "flavor": "Watching. Always watching.",
+   "art": "target-dummy"
   },
   {
    "id": "laptop",
@@ -348,7 +372,8 @@
     3
    ],
    "icon": "💻",
-   "flavor": "Password: password."
+   "flavor": "Password: password.",
+   "art": "laptop"
   },
   {
    "id": "office_chair",
@@ -362,11 +387,12 @@
     3
    ],
    "icon": "💺",
-   "flavor": "Spins. That's the feature."
+   "flavor": "Spins. That's the feature.",
+   "art": "office-chair"
   },
   {
    "id": "electric_guitar",
-   "name": "Electric Guitar",
+   "name": "Saxophone",
    "rarity": "common",
    "w": 1,
    "h": 2,
@@ -376,7 +402,8 @@
     3
    ],
    "icon": "🎸",
-   "flavor": "Comes with a sticker of a flame."
+   "flavor": "Smooth. Slightly dented.",
+   "art": "saxophone"
   },
   {
    "id": "drum_kit",
@@ -390,7 +417,8 @@
     3
    ],
    "icon": "🥁",
-   "flavor": "Neighbours hated this."
+   "flavor": "Neighbours hated this.",
+   "art": "drum-kit"
   },
   {
    "id": "espresso_machine",
@@ -404,7 +432,8 @@
     3
    ],
    "icon": "☕",
-   "flavor": "Italian. Dramatic."
+   "flavor": "Italian. Dramatic.",
+   "art": "coffee-pot"
   },
   {
    "id": "drone",
@@ -418,7 +447,8 @@
     3
    ],
    "icon": "🚁",
-   "flavor": "Last footage: a very confused cat."
+   "flavor": "Last footage: a very confused cat.",
+   "art": "delivery-drone"
   },
   {
    "id": "neon_sign",
@@ -432,7 +462,8 @@
     3
    ],
    "icon": "🪧",
-   "flavor": "Says OPEN. Forever."
+   "flavor": "Says OPEN. Forever.",
+   "art": "hanging-sign"
   },
   {
    "id": "arcade_cabinet",
@@ -446,7 +477,8 @@
     3
    ],
    "icon": "🕹️",
-   "flavor": "High score: AAA, 999,990."
+   "flavor": "High score: AAA, 999,990.",
+   "art": "joystick"
   },
   {
    "id": "vintage_moped",
@@ -460,7 +492,8 @@
     3
    ],
    "icon": "🛵",
-   "flavor": "Starts on the third kick."
+   "flavor": "Starts on the third kick.",
+   "art": "scooter"
   },
   {
    "id": "first_edition_cards",
@@ -474,7 +507,8 @@
     3
    ],
    "icon": "🃏",
-   "flavor": "Holo. Shadowless. Gasp."
+   "flavor": "Holo. Shadowless. Gasp.",
+   "art": "card-random"
   },
   {
    "id": "jukebox",
@@ -488,7 +522,8 @@
     3
    ],
    "icon": "🎶",
-   "flavor": "Still plays the good stuff."
+   "flavor": "Still plays the good stuff.",
+   "art": "speaker"
   },
   {
    "id": "pallet",
@@ -502,7 +537,8 @@
     4
    ],
    "icon": "🪵",
-   "flavor": "Splinters included."
+   "flavor": "Splinters included.",
+   "art": "wood-pile"
   },
   {
    "id": "bolt_crate",
@@ -516,7 +552,8 @@
     4
    ],
    "icon": "🔩",
-   "flavor": "Thousands. All the wrong size."
+   "flavor": "Thousands. All the wrong size.",
+   "art": "screw"
   },
   {
    "id": "packing_peanuts",
@@ -530,7 +567,8 @@
     4
    ],
    "icon": "🥜",
-   "flavor": "They get everywhere."
+   "flavor": "They get everywhere.",
+   "art": "peanut"
   },
   {
    "id": "telescope",
@@ -544,7 +582,8 @@
     4
    ],
    "icon": "🔭",
-   "flavor": "Pointed at the neighbour's house."
+   "flavor": "Pointed at the neighbour's house.",
+   "art": "telescope"
   },
   {
    "id": "e_bike",
@@ -558,7 +597,8 @@
     4
    ],
    "icon": "🚴",
-   "flavor": "Battery at 3%."
+   "flavor": "Battery at 3%.",
+   "art": "aero-bike"
   },
   {
    "id": "wine_case",
@@ -572,7 +612,8 @@
     4
    ],
    "icon": "🍷",
-   "flavor": "Vintage: last Tuesday."
+   "flavor": "Vintage: last Tuesday.",
+   "art": "wine-bottle"
   },
   {
    "id": "gold_chain",
@@ -586,7 +627,8 @@
     4
    ],
    "icon": "📿",
-   "flavor": "Heavier than it looks."
+   "flavor": "Heavier than it looks.",
+   "art": "necklace"
   },
   {
    "id": "designer_sofa",
@@ -600,7 +642,8 @@
     4
    ],
    "icon": "🛋️",
-   "flavor": "Italian leather, one cat scratch."
+   "flavor": "Italian leather, one cat scratch.",
+   "art": "sofa"
   },
   {
    "id": "rare_whisky",
@@ -614,7 +657,8 @@
     4
    ],
    "icon": "🥃",
-   "flavor": "Aged 30 years. Opened 0 times."
+   "flavor": "Aged 30 years. Opened 0 times.",
+   "art": "brandy-bottle"
   },
   {
    "id": "sports_motorbike",
@@ -628,7 +672,8 @@
     4
    ],
    "icon": "🏍️",
-   "flavor": "Zero to regret in 3 seconds."
+   "flavor": "Zero to regret in 3 seconds.",
+   "art": "full-motorcycle-helmet"
   },
   {
    "id": "diamond_necklace",
@@ -642,7 +687,8 @@
     4
    ],
    "icon": "💎",
-   "flavor": "Certificate included."
+   "flavor": "Certificate included.",
+   "art": "gem-pendant"
   },
   {
    "id": "classic_painting",
@@ -656,7 +702,8 @@
     4
    ],
    "icon": "🖼️",
-   "flavor": "The museum has been looking for this."
+   "flavor": "The museum has been looking for this.",
+   "art": "mona-lisa"
   },
   {
    "id": "empty_ammo_crate",
@@ -670,7 +717,8 @@
     5
    ],
    "icon": "🗃️",
-   "flavor": "Empty. Thankfully."
+   "flavor": "Empty. Thankfully.",
+   "art": "ammo-box"
   },
   {
    "id": "gas_mask",
@@ -684,7 +732,8 @@
     5
    ],
    "icon": "😷",
-   "flavor": "Smells of rubber and history."
+   "flavor": "Smells of rubber and history.",
+   "art": "gas-mask"
   },
   {
    "id": "camo_netting",
@@ -698,7 +747,8 @@
     5
    ],
    "icon": "🥬",
-   "flavor": "You almost didn't see it."
+   "flavor": "You almost didn't see it.",
+   "art": "fishing-net"
   },
   {
    "id": "field_radio",
@@ -712,7 +762,8 @@
     5
    ],
    "icon": "📡",
-   "flavor": "Someone is still reporting in."
+   "flavor": "Someone is still reporting in.",
+   "art": "walkie-talkie"
   },
   {
    "id": "night_vision",
@@ -726,7 +777,8 @@
     5
    ],
    "icon": "🥽",
-   "flavor": "Everything is green now."
+   "flavor": "Everything is green now.",
+   "art": "night-vision"
   },
   {
    "id": "sat_phone",
@@ -740,7 +792,8 @@
     5
    ],
    "icon": "☎️",
-   "flavor": "Three missed calls from 'HQ'."
+   "flavor": "Three missed calls from 'HQ'.",
+   "art": "satellite-communication"
   },
   {
    "id": "officer_sword",
@@ -754,7 +807,8 @@
     5
    ],
    "icon": "🗡️",
-   "flavor": "Ceremonial. Very sharp ceremony."
+   "flavor": "Ceremonial. Very sharp ceremony.",
+   "art": "katana"
   },
   {
    "id": "army_jeep",
@@ -768,7 +822,8 @@
     5
    ],
    "icon": "🚙",
-   "flavor": "Keys in the ignition."
+   "flavor": "Keys in the ignition.",
+   "art": "jeep"
   },
   {
    "id": "medal_case",
@@ -782,7 +837,8 @@
     5
    ],
    "icon": "🎖️",
-   "flavor": "A whole career in one box."
+   "flavor": "A whole career in one box.",
+   "art": "medal"
   },
   {
    "id": "gold_bars",
@@ -796,7 +852,8 @@
     5
    ],
    "icon": "🥇",
-   "flavor": "Stamped with a bank that no longer exists."
+   "flavor": "Stamped with a bank that no longer exists.",
+   "art": "gold-bar"
   },
   {
    "id": "prototype_engine",
@@ -810,7 +867,8 @@
     5
    ],
    "icon": "🛸",
-   "flavor": "The label has been redacted."
+   "flavor": "The label has been redacted.",
+   "art": "ufo"
   },
   {
    "id": "enigma_device",
@@ -824,7 +882,8 @@
     5
    ],
    "icon": "⌨️",
-   "flavor": "Still set to yesterday's code."
+   "flavor": "Still set to yesterday's code.",
+   "art": "keyboard"
   },
   {
    "id": "ship_rope",
@@ -838,7 +897,8 @@
     5
    ],
    "icon": "🪢",
-   "flavor": "Salty."
+   "flavor": "Salty.",
+   "art": "rope-coil"
   },
   {
    "id": "barnacle_crate",
@@ -852,7 +912,8 @@
     5
    ],
    "icon": "🐚",
-   "flavor": "The barnacles have moved in."
+   "flavor": "The barnacles have moved in.",
+   "art": "crab"
   },
   {
    "id": "anchor_chain",
@@ -866,7 +927,8 @@
     5
    ],
    "icon": "⛓️",
-   "flavor": "Very, very heavy."
+   "flavor": "Very, very heavy.",
+   "art": "anchor"
   },
   {
    "id": "ship_bell",
@@ -880,7 +942,8 @@
     5
    ],
    "icon": "🔔",
-   "flavor": "Rings true after 60 years."
+   "flavor": "Rings true after 60 years.",
+   "art": "ringing-bell"
   },
   {
    "id": "porcelain_vase",
@@ -894,7 +957,8 @@
     5
    ],
    "icon": "🏺",
-   "flavor": "Survived a shipwreck. Don't drop it."
+   "flavor": "Survived a shipwreck. Don't drop it.",
+   "art": "porcelain-vase"
   },
   {
    "id": "pirate_chest",
@@ -908,7 +972,8 @@
     5
    ],
    "icon": "🧳",
-   "flavor": "Locked. Rattles promisingly."
+   "flavor": "Locked. Rattles promisingly.",
+   "art": "locked-chest"
   },
   {
    "id": "captains_log",
@@ -922,7 +987,8 @@
     5
    ],
    "icon": "📔",
-   "flavor": "The last entry is… interesting."
+   "flavor": "The last entry is… interesting.",
+   "art": "black-book"
   },
   {
    "id": "vintage_sports_car",
@@ -936,7 +1002,8 @@
     5
    ],
    "icon": "🏎️",
-   "flavor": "Wrapped in oilcloth since 1962."
+   "flavor": "Wrapped in oilcloth since 1962.",
+   "art": "race-car"
   },
   {
    "id": "crown_jewel",
@@ -950,7 +1017,8 @@
     5
    ],
    "icon": "👑",
-   "flavor": "Some kingdom wants this back."
+   "flavor": "Some kingdom wants this back.",
+   "art": "crown"
   },
   {
    "id": "pharaoh_mask",
@@ -964,7 +1032,8 @@
     5
    ],
    "icon": "🗿",
-   "flavor": "This should be in a museum."
+   "flavor": "This should be in a museum.",
+   "art": "pharoah"
   },
   {
    "id": "meteorite",
@@ -978,7 +1047,8 @@
     5
    ],
    "icon": "☄️",
-   "flavor": "Fell from the sky. Then fell in the sea."
+   "flavor": "Fell from the sky. Then fell in the sea.",
+   "art": "meteor-impact"
   }
  ]
 }

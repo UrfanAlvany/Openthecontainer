@@ -17,27 +17,32 @@
     {
       "id": "tools",
       "name": "Tools",
-      "icon": "🛠️"
+      "icon": "🛠️",
+      "art": "gear-hammer"
     },
     {
       "id": "knowledge",
       "name": "Knowledge",
-      "icon": "🔍"
+      "icon": "🔍",
+      "art": "magnifying-glass"
     },
     {
       "id": "access",
       "name": "Access",
-      "icon": "🎫"
+      "icon": "🎫",
+      "art": "ticket"
     },
     {
       "id": "business",
       "name": "Business",
-      "icon": "💼"
+      "icon": "💼",
+      "art": "receive-money"
     },
     {
       "id": "luck",
       "name": "Luck",
-      "icon": "🍀"
+      "icon": "🍀",
+      "art": "clover"
     }
   ],
   "upgrades": [
@@ -54,7 +59,8 @@
       "cost": {
         "base": 60,
         "growth": 2.1
-      }
+      },
+      "art": "trowel"
     },
     {
       "id": "brush",
@@ -72,7 +78,8 @@
           4000,
           60000
         ]
-      }
+      },
+      "art": "broom"
     },
     {
       "id": "auto",
@@ -93,7 +100,8 @@
           "id": "scraper",
           "level": 2
         }
-      ]
+      ],
+      "art": "robot-grab"
     },
     {
       "id": "appraiser",
@@ -111,7 +119,8 @@
           3000,
           50000
         ]
-      }
+      },
+      "art": "magnifying-glass"
     },
     {
       "id": "peek",
@@ -129,7 +138,8 @@
           5000,
           80000
         ]
-      }
+      },
+      "art": "door"
     },
     {
       "id": "xray",
@@ -146,7 +156,8 @@
           8000,
           200000
         ]
-      }
+      },
+      "art": "skeleton-inside"
     },
     {
       "id": "license",
@@ -171,7 +182,8 @@
           150000,
           3000000
         ]
-      }
+      },
+      "art": "ticket"
     },
     {
       "id": "haggle",
@@ -186,7 +198,8 @@
       "cost": {
         "base": 100,
         "growth": 1.75
-      }
+      },
+      "art": "receive-money"
     },
     {
       "id": "crew",
@@ -207,7 +220,8 @@
           "id": "license",
           "level": 1
         }
-      ]
+      ],
+      "art": "forklift"
     },
     {
       "id": "crew_training",
@@ -230,7 +244,8 @@
           "id": "crew",
           "level": 1
         }
-      ]
+      ],
+      "art": "graduate-cap"
     },
     {
       "id": "auto_sell_junk",
@@ -246,7 +261,8 @@
         "list": [
           400
         ]
-      }
+      },
+      "art": "trash-can"
     },
     {
       "id": "lucky_charm",
@@ -261,7 +277,8 @@
       "cost": {
         "base": 300,
         "growth": 2.2
-      }
+      },
+      "art": "clover"
     }
   ]
 }

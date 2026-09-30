@@ -212,5 +212,23 @@
     "comment": "When the player cannot afford any container, the free scrap pile is offered.",
     "containerId": "scrap_pile"
   },
-  "evSamples": 2000
+  "evSamples": 2000,
+  "uiArt": {
+    "cash": "coins",
+    "star": "star-medal",
+    "upgrades": "gear-hammer",
+    "collections": "bookshelf",
+    "contracts": "notebook",
+    "log": "open-book",
+    "sound": "speaker",
+    "mute": "speaker-off",
+    "gavel": "banging-gavel",
+    "flashlight": "flashlight",
+    "crane": "cargo-crane",
+    "close": "cancel",
+    "you": "hand",
+    "walk": "exit-door",
+    "lock": "padlock",
+    "seagull": "seagull"
+  }
 }

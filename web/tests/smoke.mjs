@@ -63,11 +63,12 @@ for (const vp of [{ name: "desktop", width: 1280, height: 800 }, { name: "phone"
   await page.route(/fonts\.(googleapis|gstatic)\.com/, r => r.abort());   // offline-safe
   await page.addInitScript(() => { try { localStorage.clear(); } catch (e) {} });
   await page.goto(url);
-  await page.waitForSelector(".lot");
-  await page.screenshot({ path: path.join(outDir, `${vp.name}-1-auction.png`), fullPage: true });
+  await page.waitForSelector(".lotbox");
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: path.join(outDir, `${vp.name}-1-quay.png`) });
 
-  // Buy the cheapest affordable lot.
-  await page.locator(".lot .buy:not([disabled])").last().click();
+  // Buy the selected (fixed-price) lot.
+  await page.locator("#lot-cta:not([disabled])").click();
   await page.waitForSelector(".grid");
   await page.locator(".grid").scrollIntoViewIfNeeded();
   const grid = await page.locator(".grid").boundingBox();
@@ -75,33 +76,38 @@ for (const vp of [{ name: "desktop", width: 1280, height: 800 }, { name: "phone"
   await page.mouse.down();
   await page.mouse.move(grid.x + grid.width * 0.6, grid.y + grid.height / 2, { steps: 8 });
   await page.mouse.up();
-  await page.screenshot({ path: path.join(outDir, `${vp.name}-2-scraping.png`), fullPage: true });
+  await page.waitForTimeout(200);
+  await page.screenshot({ path: path.join(outDir, `${vp.name}-2-scraping.png`) });
 
   await scrapeAll(page);
-  await page.waitForSelector(".tally .card", { timeout: 5000 });
-  await page.waitForTimeout(400);
-  await page.screenshot({ path: path.join(outDir, `${vp.name}-3-tally.png`), fullPage: true });
+  await page.waitForSelector(".tally .docket", { timeout: 5000 });
+  await page.waitForTimeout(1300);
+  await page.screenshot({ path: path.join(outDir, `${vp.name}-3-tally.png`) });
   const before = await page.evaluate(() => window.dockside.game.s.money);
   await page.click("#tally-continue");
-  await page.waitForSelector(".lot");
+  await page.waitForSelector(".lotbox");
   const after = await page.evaluate(() => window.dockside.game.s.money);
   if (!(after >= before)) errors.push(`[${vp.name}] money went down after selling: ${before} → ${after}`);
 
   // Give cash and buy an upgrade through the UI.
   await page.evaluate(() => { window.dockside.game.s.money += 5000; });
-  await page.waitForTimeout(350);
-  const upBtn = page.locator(".up .btn:not([disabled])").first();
+  await page.click("#nav-upgrades");
+  await page.waitForTimeout(450);
+  const upBtn = page.locator(".shop-item .gbtn:not([disabled])").first();
   await upBtn.click();
   const levels = await page.evaluate(() => Object.values(window.dockside.game.s.levels).reduce((a, b) => a + b, 0));
   if (levels < 1) errors.push(`[${vp.name}] upgrade purchase did not register`);
-  await page.screenshot({ path: path.join(outDir, `${vp.name}-4-after-upgrade.png`), fullPage: true });
+  await page.screenshot({ path: path.join(outDir, `${vp.name}-4-upgrades.png`) });
+  await page.click(".sheet header .roundbtn");
+  await page.waitForTimeout(350);
 
   // Auction: unlock Standard, join the bidding, bid until the lot is ours or we're outbid.
   await page.evaluate(() => { const g = window.dockside.game; g.s.money += 20000; g.buyUpgrade("license"); });
   await page.waitForTimeout(200);
-  await page.locator(".lot .buy:not([disabled])", { hasText: "Join the bidding" }).first().click();
+  await page.locator(".lotbox").first().click();
+  await page.locator("#lot-cta:not([disabled])", { hasText: "Join the bidding" }).click();
   await page.waitForSelector(".auction");
-  await page.screenshot({ path: path.join(outDir, `${vp.name}-5-auction.png`), fullPage: true });
+  await page.screenshot({ path: path.join(outDir, `${vp.name}-5-auction.png`) });
   for (let i = 0; i < 40; i++) {
     if (await page.locator(".grid").count()) break;
     const bid = page.locator("#bid-btn:not([disabled])");
@@ -111,23 +117,24 @@ for (const vp of [{ name: "desktop", width: 1280, height: 800 }, { name: "phone"
     await page.waitForTimeout(300);
   }
   await page.waitForTimeout(500);
-  await page.screenshot({ path: path.join(outDir, `${vp.name}-6-after-auction.png`), fullPage: true });
+  await page.screenshot({ path: path.join(outDir, `${vp.name}-6-after-auction.png`) });
   const state = await page.evaluate(() => ({ money: window.dockside.game.s.money, cur: !!window.dockside.game.s.current }));
   if (state.money < 0) errors.push(`[${vp.name}] money negative after auction`);
   if (state.cur) {
     await scrapeAll(page);
-    await page.waitForSelector(".tally .card", { timeout: 5000 });
+    await page.waitForSelector(".tally .docket", { timeout: 5000 });
     await page.click("#tally-continue");
   } else if (await page.locator(".passcard").count()) {
     await page.locator(".passcard .btn").click();
   }
   // Walk away from a lot without bidding and check the "what was inside" card.
-  await page.waitForSelector(".lot");
-  await page.locator(".lot .buy:not([disabled])", { hasText: "Join the bidding" }).first().click();
+  await page.waitForSelector(".lotbox");
+  await page.locator(".lotbox").first().click();
+  await page.locator("#lot-cta:not([disabled])", { hasText: "Join the bidding" }).click();
   await page.waitForSelector("#pass-btn");
   await page.click("#pass-btn");
   await page.waitForSelector(".passcard");
-  await page.screenshot({ path: path.join(outDir, `${vp.name}-7-walked-away.png`), fullPage: true });
+  await page.screenshot({ path: path.join(outDir, `${vp.name}-7-walked-away.png`) });
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
   if (overflow) errors.push(`[${vp.name}] page scrolls horizontally`);

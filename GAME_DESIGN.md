@@ -212,11 +212,18 @@ prestige. It uses 6 hits per second for a human scraper and 4 s per auction.
 
 ## 10. Feel and UI rules
 
+- **It's a game screen, not a web page** (D-017): the world (night port) is always behind
+  the UI; the HUD shows only cash, crew income and reputation; menus are sheets that slide
+  over the world and close with a tap outside.
 - One accent (sodium-lamp orange) for actions and goals. Rarity colours only for rarity.
   Green/red only for profit/loss.
-- The stage shows one thing at a time: the auction, or the container being opened.
+- Items are icons from one art set (game-icons.net), white with a glow in their rarity
+  colour. No emoji.
+- The stage shows one thing at a time: the quay, the auction board, or the open container.
+- Physical metaphors over widgets: price tags, an LED auction board, a paper docket with a
+  stamp, pinned contract slips, a collection book.
 - Sounds are synthesised (no files), scale with rarity and start only after the first tap.
-- `prefers-reduced-motion`: particles cut to a quarter, no shake or build-up delays.
+- `prefers-reduced-motion`: particles cut to a quarter; no shake, door swing or build-up delays.
 - Must work with touch on a phone (390 px wide) and with a mouse on a desktop.
 
 ## 11. Next phases (proposed)

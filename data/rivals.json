@@ -32,7 +32,8 @@
         "neutral": "chews his toothpick",
         "nervous": "is sweating through his shirt",
         "out": "storms off"
-      }
+      },
+      "art": "mustache"
     },
     {
       "id": "okafor",
@@ -48,7 +49,8 @@
         "neutral": "adjusts her glasses",
         "nervous": "taps her pen, frowning",
         "out": "closes her notebook"
-      }
+      },
+      "art": "magnifying-glass"
     },
     {
       "id": "dex",
@@ -64,7 +66,8 @@
         "neutral": "checks his banking app",
         "nervous": "whispers 'come on, come on'",
         "out": "puts his phone away"
-      }
+      },
+      "art": "smartphone"
     },
     {
       "id": "lou",
@@ -80,7 +83,8 @@
         "neutral": "sips his coffee",
         "nervous": "puts his coffee down",
         "out": "tips his cap and leaves"
-      }
+      },
+      "art": "captain-hat-profile"
     },
     {
       "id": "vega",
@@ -96,7 +100,8 @@
         "neutral": "whisper to each other",
         "nervous": "argue in whispers",
         "out": "shake their heads in unison"
-      }
+      },
+      "art": "porcelain-vase"
     }
   ]
 }

@@ -132,3 +132,15 @@ moving; Urfan can overrule at any time), **Superseded**.
   (0.2–0.35× the guide price of your best class). No expiry, no penalty.
 - **Why:** Gives saving stretches a short-term goal. Simulated median worst gap fell from
   8.8 to 6.4 min. The research's "session clock/quota" idea, adapted without a fail state.
+
+### D-017 — Visual direction: a game screen, not a web page
+- **Date:** 2026-09-30 · **By:** Urfan (feedback) → Claude (implementation) · **Status:** Working
+- **What:** Urfan: "design is like ai and toy not a game". The prototype drops the dashboard
+  layout for a full-screen night-port scene (procedural canvas: cranes, container stacks,
+  sodium lamps, water, fog) with a game HUD, containers drawn as steel boxes with real
+  markings, an LED auction board with rival medallions, a paper docket with an ink stamp,
+  chunky pressable buttons, and slide-in sheets for upgrades, contracts, the collection
+  book and the log. Emoji are replaced by one consistent icon set: game-icons.net
+  (CC BY 3.0, credited in-game and in the README).
+- **Why:** The dashboard look and emoji read as "AI-made toy". This is still prototype art;
+  final art direction (style, characters, item illustrations) is Phase 5 and Urfan's call.

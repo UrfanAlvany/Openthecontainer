@@ -40,3 +40,9 @@ python3 sim/run.py   # writes sim/out/report.html
 5. Look and sound
 6. Public demo + metrics
 7. Full game on Steam (Unity)
+
+## Credits
+- Icons: [game-icons.net](https://game-icons.net) by Lorc, Delapouite and contributors,
+  licensed [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). The subset used is in
+  `web/vendor/game-icons-subset.json` (regenerate with `tools/extract_icons.py`).
+- Fonts: Big Shoulders Display / Stencil and Barlow Semi Condensed (Google Fonts, OFL).
