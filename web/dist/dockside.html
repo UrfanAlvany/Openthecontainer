@@ -1,0 +1,1622 @@
+<title>Dockside</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&family=Big+Shoulders+Stencil+Display:wght@700;800&display=swap">
+<style>
+/* Layout: a night-shift port office. Left: the stage (auction lots or the open container).
+   Right: the clipboard (upgrades, collections, log). Single dark world under sodium lamps. */
+:root {
+  --night: #0e1a22;        /* harbour at night */
+  --steel: #16252f;        /* panel steel */
+  --steel-hi: #1f323e;     /* raised steel */
+  --line: #2c4250;         /* weld seams */
+  --fog: #d5dfe3;          /* text under lamps */
+  --muted: #8a9ca8;        /* stencil grey */
+  --sodium: #ffae42;       /* sodium floodlight: the one accent */
+  --sodium-ink: #2a1a05;
+  --gain: #5bd68e;
+  --loss: #ff6f5e;
+  --r-junk: #8a8f98; --r-common: #5fbf6a; --r-rare: #3d8bff; --r-epic: #b05cff; --r-legendary: #ffb020;
+  --font-display: "Big Shoulders Stencil Display", "Impact", "Arial Narrow", sans-serif;
+  --font-body: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --font-num: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --radius: 6px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background:
+    radial-gradient(1200px 500px at 70% -10%, rgba(255, 174, 66, .10), transparent 60%),
+    var(--night);
+  color: var(--fog);
+  font: 15px/1.45 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--sodium); outline-offset: 2px; }
+
+.app { max-width: 1280px; margin: 0 auto; padding-inline: 16px; padding-block: 12px 32px; display: flex; flex-direction: column; gap: 14px; }
+
+/* ---------------------------------------------------------------- top bar */
+.topbar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; border-bottom: 1px solid var(--line); padding-block: 4px 12px; }
+.brand { font-family: var(--font-display); font-weight: 800; font-size: 30px; letter-spacing: .06em; color: var(--sodium); line-height: 1; }
+.brand small { display: block; font-family: var(--font-num); font-weight: 600; font-size: 11px; letter-spacing: .18em; color: var(--muted); margin-top: 4px; }
+.cash { margin-left: auto; display: flex; gap: 22px; align-items: flex-end; flex-wrap: wrap; }
+.stat { display: flex; flex-direction: column; align-items: flex-end; }
+.stat .label { font-family: var(--font-num); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.stat .value { font-family: var(--font-num); font-weight: 700; font-size: 22px; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat.money .value { font-size: 34px; color: var(--fog); }
+.stat.money .value.bump { animation: bump .35s ease-out; }
+@keyframes bump { 0% { transform: scale(1.12); color: var(--gain); } 100% { transform: none; } }
+.iconbtn { background: var(--steel); border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 10px; cursor: pointer; color: var(--muted); font-size: 13px; }
+.iconbtn[aria-pressed="true"] { color: var(--sodium); border-color: var(--sodium); }
+
+/* ---------------------------------------------------------------- layout */
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 18px; align-items: start; }
+@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+.stage { position: relative; min-width: 0; }
+.stage.shake { animation: shake .45s cubic-bezier(.36, .07, .19, .97); }
+@keyframes shake {
+  10%, 90% { transform: translate(-1px, 0); } 20%, 80% { transform: translate(3px, 1px); }
+  30%, 50%, 70% { transform: translate(-5px, -1px); } 40%, 60% { transform: translate(5px, 1px); }
+}
+.stage-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.stage-head h2 { font-family: var(--font-display); font-weight: 800; font-size: 26px; letter-spacing: .04em; margin: 0; text-wrap: balance; }
+.stage-head .sub { color: var(--muted); font-size: 14px; }
+
+/* ---------------------------------------------------------------- auction lots */
+.lots { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.lot { background: var(--steel); border: 1px solid var(--line); border-radius: var(--radius); display: flex; flex-direction: column; overflow: hidden; }
+.lot .box {
+  --c: #8b4a2b;
+  position: relative; height: 92px; padding: 10px 12px;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.22) 0 3px, rgba(255,255,255,.05) 3px 6px, transparent 6px 14px),
+    linear-gradient(180deg, color-mix(in srgb, var(--c) 100%, white 8%), color-mix(in srgb, var(--c) 100%, black 30%));
+  border-bottom: 3px solid rgba(0,0,0,.35);
+}
+.lot .code { font-family: var(--font-display); font-weight: 800; font-size: 20px; letter-spacing: .08em; color: rgba(255,255,255,.88); text-shadow: 0 1px 0 rgba(0,0,0,.4); }
+.lot .spec { font-family: var(--font-num); font-size: 12px; letter-spacing: .12em; color: rgba(255,255,255,.7); }
+.lot .tierbadge { position: absolute; right: 10px; top: 10px; font-family: var(--font-num); font-size: 11px; letter-spacing: .14em; background: rgba(0,0,0,.35); padding: 2px 7px; border-radius: 3px; }
+.lot .body { padding: 12px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.lot h3 { margin: 0; font-size: 17px; font-weight: 600; }
+.lot .blurb { margin: 0; color: var(--muted); font-size: 13px; min-height: 2.9em; }
+.peek { display: grid; gap: 2px; background: #0a1319; padding: 4px; border-radius: 4px; }
+.peek .pc { aspect-ratio: 1; border-radius: 2px; background: #3b2a20; display: grid; place-items: center; font-size: 10px; overflow: hidden; }
+.peek .pc.seen { background: color-mix(in srgb, var(--rc) 35%, #0a1319); box-shadow: inset 0 0 0 1px var(--rc); }
+.peek .pc.outline { box-shadow: inset 0 0 0 1px rgba(160, 220, 255, .35); }
+.peek-label { font-family: var(--font-num); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.odds { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: #0a1319; }
+.odds span { display: block; height: 100%; }
+.odds-legend { display: flex; flex-wrap: wrap; gap: 4px 10px; font-family: var(--font-num); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.odds-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; vertical-align: 0; }
+.lot .buy { margin-top: auto; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--sodium); color: var(--sodium-ink); border: 0; border-radius: var(--radius);
+  padding: 10px 14px; font-weight: 700; cursor: pointer; font-family: var(--font-num); font-size: 17px; letter-spacing: .04em;
+  transition: transform .08s ease, filter .15s ease;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn:active { transform: translateY(1px); }
+.btn[disabled] { background: var(--steel-hi); color: var(--muted); cursor: not-allowed; filter: none; }
+.btn.ghost { background: transparent; color: var(--fog); border: 1px solid var(--line); }
+.btn.wide { width: 100%; }
+
+/* ---------------------------------------------------------------- the open container */
+.yard { display: flex; flex-direction: column; gap: 12px; }
+.meter { display: flex; gap: 18px; flex-wrap: wrap; font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.meter div { display: flex; flex-direction: column; }
+.meter .k { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.meter .v { font-size: 26px; font-weight: 700; line-height: 1.1; }
+.meter .v.gain { color: var(--gain); } .meter .v.loss { color: var(--loss); }
+
+.frame {
+  position: relative; padding: 14px; border-radius: 8px;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.25) 0 3px, rgba(255,255,255,.04) 3px 6px, transparent 6px 16px),
+    linear-gradient(180deg, color-mix(in srgb, var(--c, #8b4a2b) 90%, white 5%), color-mix(in srgb, var(--c, #8b4a2b) 80%, black 35%));
+  box-shadow: 0 18px 40px rgba(0,0,0,.45), inset 0 0 0 2px rgba(0,0,0,.35);
+}
+.frame .stencil { position: absolute; left: 16px; top: -2px; transform: translateY(-100%); font-family: var(--font-display); font-weight: 800; letter-spacing: .1em; font-size: 15px; color: var(--muted); }
+.grid {
+  position: relative; display: grid; gap: 0;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  grid-template-rows: repeat(var(--rows), 1fr);
+  aspect-ratio: var(--cols) / var(--rows);
+  width: min(100%, calc(var(--cols) * 78px));
+  margin: 0 auto;
+  background: #120d0a; border-radius: 4px; overflow: hidden;
+  touch-action: none; user-select: none; -webkit-user-select: none; cursor: crosshair;
+}
+.item {
+  position: relative; display: grid; place-items: center;
+  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--rc) 38%, #141c22), #10161b 75%);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--rc) 70%, transparent);
+  font-size: calc(min(var(--iw), var(--ih)) * 34px);
+  line-height: 1; z-index: 1;
+}
+.item .glyph { filter: drop-shadow(0 2px 4px rgba(0,0,0,.5)); }
+.item.revealed { animation: pop .45s cubic-bezier(.2, 1.6, .4, 1); }
+.item.revealed.r-epic, .item.revealed.r-legendary { box-shadow: inset 0 0 0 2px var(--rc), 0 0 22px color-mix(in srgb, var(--rc) 70%, transparent); z-index: 3; }
+.item.sold { opacity: .35; filter: grayscale(.8); }
+.item .tag { position: absolute; left: 3px; bottom: 3px; font-family: var(--font-num); font-size: 12px; font-weight: 700; background: rgba(0,0,0,.6); padding: 0 5px; border-radius: 3px; color: var(--fog); font-variant-numeric: tabular-nums; }
+.item .keep { position: absolute; right: 3px; top: 3px; font-size: 12px; }
+@keyframes pop { 0% { transform: scale(.7); } 100% { transform: none; } }
+
+.tiles { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-template-rows: repeat(var(--rows), 1fr); z-index: 4; pointer-events: none; }
+.tile {
+  --hp: 1;
+  border: 1px solid rgba(0,0,0,.35);
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255, 170, 110, .18) 0 12%, transparent 13%),
+    radial-gradient(circle at 70% 65%, rgba(40, 18, 8, .45) 0 18%, transparent 19%),
+    radial-gradient(circle at 45% 80%, rgba(210, 120, 60, .25) 0 9%, transparent 10%),
+    linear-gradient(135deg, #7a3b1d, #5a2a15 55%, #6d3519);
+  opacity: calc(.55 + var(--hp) * .45);
+  transition: opacity .12s linear, transform .12s ease;
+}
+.tile.hit { transform: scale(.94); }
+.tile.gone { opacity: 0; transform: scale(.6); transition: opacity .18s ease-out, transform .18s ease-out; }
+.tile.glint { animation: glint 1.6s ease-in-out infinite; }
+@keyframes glint {
+  0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
+  50% { box-shadow: inset 0 0 14px 2px var(--gc); }
+}
+.xray { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-template-rows: repeat(var(--rows), 1fr); z-index: 5; pointer-events: none; }
+.xray div { border: 1px dashed rgba(160, 220, 255, .45); margin: 3px; border-radius: 3px; }
+
+.fx { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+.flash { position: fixed; inset: 0; pointer-events: none; z-index: 49; opacity: 0; background: radial-gradient(circle at 50% 45%, var(--fc, #fff), transparent 70%); }
+.flash.on { animation: flash .7s ease-out; }
+@keyframes flash { 0% { opacity: .55; } 100% { opacity: 0; } }
+.float { position: fixed; z-index: 51; pointer-events: none; font-family: var(--font-num); font-weight: 700; font-size: 20px; color: var(--fc); text-shadow: 0 2px 6px rgba(0,0,0,.7); animation: rise 1.1s ease-out forwards; white-space: nowrap; }
+.float.big { font-size: 34px; }
+@keyframes rise { 0% { transform: translate(-50%, 0) scale(.8); opacity: 0; } 15% { opacity: 1; transform: translate(-50%, -10px) scale(1.05); } 100% { transform: translate(-50%, -70px); opacity: 0; } }
+.banner { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); z-index: 20; pointer-events: none; text-align: center; animation: banner 1.8s ease-out forwards; }
+.banner b { display: block; font-family: var(--font-display); font-weight: 800; font-size: clamp(34px, 7vw, 64px); letter-spacing: .06em; color: var(--bc); text-shadow: 0 0 30px color-mix(in srgb, var(--bc) 60%, transparent), 0 4px 0 rgba(0,0,0,.5); }
+.banner span { font-family: var(--font-num); font-size: 20px; color: var(--fog); }
+@keyframes banner { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.6); } 12% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); } 25% { transform: translate(-50%, -50%) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -60%); } }
+
+.finds { display: flex; flex-direction: column; gap: 6px; }
+.find { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 8px; align-items: center; background: var(--steel); border-left: 3px solid var(--rc); border-radius: 4px; padding: 6px 10px; font-size: 14px; }
+.find .n { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.find .n small { color: var(--muted); margin-left: 6px; }
+.find .val { font-family: var(--font-num); font-weight: 700; font-variant-numeric: tabular-nums; }
+.find .ico { font-size: 20px; text-align: center; }
+.find.col { background: color-mix(in srgb, var(--sodium) 10%, var(--steel)); }
+
+/* ---------------------------------------------------------------- tally */
+.tally { position: absolute; inset: 0; z-index: 30; display: grid; place-items: center; padding: 16px; background: rgba(8, 14, 18, .72); backdrop-filter: blur(2px); }
+.tally .card { width: min(520px, 100%); background: var(--steel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 60px rgba(0,0,0,.5); max-height: 100%; overflow: auto; }
+.tally h3 { margin: 0; font-family: var(--font-display); font-weight: 800; letter-spacing: .05em; font-size: 24px; }
+.tally .rows { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tally .rows div { background: var(--night); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; }
+.tally .rows .k { font-family: var(--font-num); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.tally .rows .v { font-family: var(--font-num); font-size: clamp(20px, 5vw, 30px); font-weight: 700; font-variant-numeric: tabular-nums; }
+.tally .verdict { font-family: var(--font-num); font-size: 18px; }
+.tally.loss .card { animation: dud .5s ease-out; }
+@keyframes dud { 0% { transform: rotate(-1.5deg) scale(.96); } 40% { transform: rotate(1deg); } 100% { transform: none; } }
+.keeps { display: flex; flex-direction: column; gap: 6px; }
+.keeprow { display: flex; align-items: center; gap: 10px; background: var(--night); border-radius: 6px; padding: 8px 10px; font-size: 14px; }
+.keeprow label { display: flex; gap: 8px; align-items: center; cursor: pointer; flex: 1; min-width: 0; }
+.keeprow small { color: var(--muted); }
+
+/* ---------------------------------------------------------------- clipboard panel */
+.panel { background: var(--steel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; min-width: 0; }
+.tabs { display: flex; border-bottom: 1px solid var(--line); }
+.tabs button { flex: 1; background: none; border: 0; padding: 11px 6px; cursor: pointer; font-family: var(--font-num); font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); border-bottom: 2px solid transparent; }
+.tabs button[aria-selected="true"] { color: var(--fog); border-bottom-color: var(--sodium); }
+.tabpane { padding: 12px; display: flex; flex-direction: column; gap: 12px; max-height: calc(100vh - 150px); overflow: auto; }
+@media (max-width: 900px) { .tabpane { max-height: none; } }
+.goal { background: color-mix(in srgb, var(--sodium) 9%, var(--night)); border: 1px solid color-mix(in srgb, var(--sodium) 40%, var(--line)); border-radius: 6px; padding: 10px; font-size: 13px; display: flex; flex-direction: column; gap: 6px; }
+.goal b { font-weight: 600; }
+.bar { height: 6px; background: var(--night); border-radius: 3px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--sodium); width: 0; transition: width .25s linear; }
+.cat { font-family: var(--font-num); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.up { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px; border-radius: 6px; background: var(--night); }
+.up .ico { font-size: 20px; text-align: center; }
+.up .t { font-weight: 600; font-size: 14px; }
+.up .d { color: var(--muted); font-size: 12.5px; line-height: 1.35; }
+.up .pips { font-family: var(--font-num); font-size: 12px; color: var(--sodium); letter-spacing: .06em; }
+.up .btn { padding: 7px 10px; font-size: 15px; min-width: 84px; }
+.up.locked { opacity: .55; }
+.up.maxed .btn { background: transparent; color: var(--gain); }
+.prestige { border: 1px dashed var(--line); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.prestige h4 { margin: 0; font-size: 15px; }
+.col-card { background: var(--night); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.col-card header { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.col-card .reward { color: var(--muted); font-size: 12.5px; }
+.col-card.done { box-shadow: inset 0 0 0 1px var(--gain); }
+.slots { display: flex; flex-wrap: wrap; gap: 6px; }
+.slot { width: 44px; height: 44px; border-radius: 6px; display: grid; place-items: center; font-size: 22px; background: var(--steel); box-shadow: inset 0 0 0 1px var(--rc); position: relative; }
+.slot.empty { font-size: 15px; color: var(--muted); font-family: var(--font-num); }
+.log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.log li { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--line); padding-bottom: 6px; font-variant-numeric: tabular-nums; }
+.log .gain { color: var(--gain); } .log .loss { color: var(--loss); }
+.footer { color: var(--muted); font-size: 12.5px; display: flex; gap: 16px; flex-wrap: wrap; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--steel-hi); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; z-index: 60; font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.4); max-width: calc(100% - 32px); }
+.hint { color: var(--muted); font-size: 13px; text-align: center; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+</style>
+<div id="app" class="app"></div>
+<script>
+/* Generated by web/build.py from data/*.json. Do not edit. */
+window.DOCKSIDE_DATA = {"config":{"version":1,"startMoney":250,"rarities":[{"id":"junk","name":"Junk","color":"#8a8f98"},{"id":"common","name":"Common","color":"#5fbf6a"},{"id":"rare","name":"Rare","color":"#3d8bff"},{"id":"epic","name":"Epic","color":"#b05cff"},{"id":"legendary","name":"Legendary","color":"#ffb020"}],"conditions":[{"id":"poor","name":"Poor","mult":0.6,"weight":25},{"id":"fair","name":"Fair","mult":1.0,"weight":50},{"id":"good","name":"Good","mult":1.3,"weight":20},{"id":"mint","name":"Mint","mult":2.0,"weight":5}],"luck":{"comment":"Per luck level, each rarity weight is multiplied by (1 + level * perLevel), floored at minMult.","perLevel":{"junk":-0.03,"common":0.0,"rare":0.05,"epic":0.07,"legendary":0.1},"minMult":0.2},"scraping":{"comment":"Brush level -> effective tiles covered per hit while dragging (accounts for overlap). Used by the simulator; the game applies the real brush pattern.","brushPatterns":[[[0,0]],[[0,0],[1,0],[-1,0],[0,1],[0,-1]],[[0,0],[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]],[[0,0],[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1],[2,0],[-2,0],[0,2],[0,-2]]],"brushEfficiency":[1.0,2.6,4.5,7.0],"holdRepeatMs":110,"simHumanHitsPerSec":6,"simOverheadSec":3},"crew":{"comment":"Each crew member opens one container of the crew tier every secondsPerContainer and earns its expected profit (never below zero).","secondsPerContainer":45},"prestige":{"comment":"Total stars = floor(sqrt(lifetimeEarnings / earningsPerStarSquared)). Each star adds sellBonusPerStar to the sell multiplier.","earningsPerStarSquared":200000000,"sellBonusPerStar":0.5},"safetyNet":{"comment":"When the player cannot afford any container, the free scrap pile is offered.","containerId":"scrap_pile"}},"containers":{"containers":[{"id":"scrap_pile","tier":0,"name":"Dockside Scrap Pile","blurb":"Free. Someone left it by the fence. It is all rubbish, but it's something.","price":0,"cols":3,"rows":3,"rustHp":1,"peekTiles":0,"rarityWeights":{"junk":88,"common":12,"rare":0,"epic":0,"legendary":0},"itemTier":1,"safetyNetOnly":true},{"id":"rusty","tier":1,"name":"Rusty Box","blurb":"A dented 10-footer from a house clear-out.","price":95,"cols":4,"rows":3,"rustHp":2,"peekTiles":2,"rarityWeights":{"junk":67,"common":28,"rare":5.0,"epic":0.45,"legendary":0.06},"itemTier":1},{"id":"standard","tier":2,"name":"Standard 20ft","blurb":"Unclaimed after the owner stopped paying storage.","price":630,"cols":6,"rows":5,"rustHp":3,"peekTiles":2,"rarityWeights":{"junk":64.5,"common":30,"rare":4.6,"epic":0.7,"legendary":0.115},"itemTier":2},{"id":"premium","tier":3,"name":"Premium 40ft","blurb":"Seized from a luxury importer. Customs paperwork missing.","price":3900,"cols":7,"rows":5,"rustHp":5,"peekTiles":2,"rarityWeights":{"junk":63,"common":31,"rare":5.1,"epic":0.75,"legendary":0.12},"itemTier":3},{"id":"military","tier":4,"name":"Sealed Military","blurb":"Decommissioned base surplus. Stencils say DO NOT OPEN.","price":51000,"cols":8,"rows":6,"rustHp":9,"peekTiles":2,"rarityWeights":{"junk":62,"common":32,"rare":4.9,"epic":0.73,"legendary":0.11},"itemTier":4},{"id":"ship_cargo","tier":5,"name":"Legendary Ship Cargo","blurb":"Recovered from a ship lost at sea in 1962.","price":560000,"cols":9,"rows":6,"rustHp":14,"peekTiles":2,"rarityWeights":{"junk":62,"common":32,"rare":5.3,"epic":0.75,"legendary":0.107},"itemTier":5}]},"items":{"items":[{"id":"soggy_box","name":"Soggy Cardboard Box","rarity":"junk","w":1,"h":1,"value":0.72,"tiers":[1,2],"icon":"📦","flavor":"Smells like 1997."},{"id":"broken_lamp","name":"Broken Lamp","rarity":"junk","w":1,"h":1,"value":1.44,"tiers":[1,2],"icon":"💡","flavor":"Still flickers if you believe."},{"id":"rubber_duck","name":"Rubber Duck","rarity":"junk","w":1,"h":1,"value":2.4,"tiers":[1,2],"icon":"🦆","flavor":"Squeaks. Worth it."},{"id":"vhs_tape","name":"Unlabelled VHS Tape","rarity":"junk","w":1,"h":1,"value":1.92,"tiers":[1,2],"icon":"📼","flavor":"Could be anything. It's a wedding."},{"id":"tangled_cables","name":"Tangled Cables","rarity":"junk","w":1,"h":1,"value":1.2,"tiers":[1,2],"icon":"🔌","flavor":"Every charger ever made."},{"id":"old_tire","name":"Old Tire","rarity":"junk","w":1,"h":1,"value":2.88,"tiers":[1,2],"icon":"🛞","flavor":"Bald as a billiard ball."},{"id":"plastic_chair","name":"Plastic Garden Chair","rarity":"junk","w":1,"h":2,"value":4.8,"tiers":[1,2],"icon":"🪑","flavor":"Structurally optimistic."},{"id":"toaster","name":"Toaster","rarity":"common","w":1,"h":1,"value":12.0,"tiers":[1,2],"icon":"🍞","flavor":"Two slots. One works."},{"id":"kettle","name":"Kettle","rarity":"common","w":1,"h":1,"value":9.6,"tiers":[1,2],"icon":"🫖","flavor":"Limescale edition."},{"id":"vinyl_record","name":"Vinyl Record","rarity":"common","w":1,"h":1,"value":14.4,"tiers":[1,2],"icon":"💿","flavor":"Side B is better."},{"id":"microwave","name":"Microwave","rarity":"common","w":1,"h":1,"value":16.8,"tiers":[1,2],"icon":"📟","flavor":"The light still comes on."},{"id":"guitar","name":"Acoustic Guitar","rarity":"common","w":1,"h":2,"value":28.8,"tiers":[1,2],"icon":"🎸","flavor":"Missing one string. Wonderwall-ready."},{"id":"bicycle","name":"Bicycle","rarity":"common","w":2,"h":2,"value":43.2,"tiers":[1,2],"icon":"🚲","flavor":"Needs air. And a chain."},{"id":"vintage_radio","name":"Vintage Radio","rarity":"rare","w":1,"h":1,"value":35,"tiers":[1,2],"icon":"📻","flavor":"Picks up a station from 1974."},{"id":"game_console","name":"Retro Game Console","rarity":"rare","w":1,"h":1,"value":45,"tiers":[1,2],"icon":"🎮","flavor":"Cartridge still inside."},{"id":"designer_bag","name":"Designer Handbag","rarity":"rare","w":1,"h":1,"value":60,"tiers":[1,2],"icon":"👜","flavor":"The stitching says real."},{"id":"antique_clock","name":"Antique Clock","rarity":"rare","w":1,"h":2,"value":80,"tiers":[1,2],"icon":"🕰️","flavor":"Ticks twice, then thinks about it."},{"id":"signed_baseball","name":"Signed Baseball","rarity":"epic","w":1,"h":1,"value":220,"tiers":[1,2],"icon":"⚾","flavor":"The signature checks out."},{"id":"silver_teaset","name":"Silver Tea Set","rarity":"epic","w":2,"h":1,"value":260,"tiers":[1,2],"icon":"🍵","flavor":"Hallmarked. Grandma knew."},{"id":"gold_pocket_watch","name":"Gold Pocket Watch","rarity":"legendary","w":1,"h":1,"value":1200,"tiers":[1,2],"icon":"⌚","flavor":"Engraved: 'For 40 years of service'."},{"id":"comic_no1","name":"Comic Book #1","rarity":"legendary","w":1,"h":1,"value":1500,"tiers":[1,2],"icon":"📚","flavor":"Bagged, boarded, never read."},{"id":"broken_tv","name":"Broken TV","rarity":"junk","w":1,"h":1,"value":4.0,"tiers":[2,3],"icon":"📺","flavor":"Makes a noise when you look at it."},{"id":"rusty_toolbox","name":"Rusty Toolbox","rarity":"junk","w":1,"h":1,"value":3.0,"tiers":[2,3],"icon":"🧰","flavor":"Contains one (1) screw."},{"id":"mannequin","name":"Mannequin","rarity":"junk","w":1,"h":2,"value":6.0,"tiers":[2,3],"icon":"🧍","flavor":"Watching. Always watching."},{"id":"laptop","name":"Old Laptop","rarity":"common","w":1,"h":1,"value":40.0,"tiers":[2,3],"icon":"💻","flavor":"Password: password."},{"id":"office_chair","name":"Office Chair","rarity":"common","w":1,"h":2,"value":25.0,"tiers":[2,3],"icon":"💺","flavor":"Spins. That's the feature."},{"id":"electric_guitar","name":"Electric Guitar","rarity":"common","w":1,"h":2,"value":60.0,"tiers":[2,3],"icon":"🎸","flavor":"Comes with a sticker of a flame."},{"id":"drum_kit","name":"Drum Kit","rarity":"common","w":2,"h":2,"value":90.0,"tiers":[2,3],"icon":"🥁","flavor":"Neighbours hated this."},{"id":"espresso_machine","name":"Espresso Machine","rarity":"rare","w":1,"h":1,"value":180.0,"tiers":[2,3],"icon":"☕","flavor":"Italian. Dramatic."},{"id":"drone","name":"Camera Drone","rarity":"rare","w":1,"h":1,"value":250.0,"tiers":[2,3],"icon":"🚁","flavor":"Last footage: a very confused cat."},{"id":"neon_sign","name":"Neon Sign","rarity":"rare","w":2,"h":1,"value":300.0,"tiers":[2,3],"icon":"🪧","flavor":"Says OPEN. Forever."},{"id":"arcade_cabinet","name":"Arcade Cabinet","rarity":"epic","w":1,"h":2,"value":1500.0,"tiers":[2,3],"icon":"🕹️","flavor":"High score: AAA, 999,990."},{"id":"vintage_moped","name":"Vintage Moped","rarity":"epic","w":2,"h":2,"value":2000.0,"tiers":[2,3],"icon":"🛵","flavor":"Starts on the third kick."},{"id":"first_edition_cards","name":"First Edition Card","rarity":"legendary","w":1,"h":1,"value":9000.0,"tiers":[2,3],"icon":"🃏","flavor":"Holo. Shadowless. Gasp."},{"id":"jukebox","name":"Classic Jukebox","rarity":"legendary","w":2,"h":2,"value":12000.0,"tiers":[2,3],"icon":"🎶","flavor":"Still plays the good stuff."},{"id":"pallet","name":"Broken Pallet","rarity":"junk","w":1,"h":1,"value":10.5,"tiers":[3,4],"icon":"🪵","flavor":"Splinters included."},{"id":"bolt_crate","name":"Crate of Bolts","rarity":"junk","w":1,"h":1,"value":14.0,"tiers":[3,4],"icon":"🔩","flavor":"Thousands. All the wrong size."},{"id":"packing_peanuts","name":"Packing Peanuts","rarity":"junk","w":1,"h":1,"value":5.6,"tiers":[3,4],"icon":"🥜","flavor":"They get everywhere."},{"id":"telescope","name":"Telescope","rarity":"common","w":1,"h":2,"value":154.0,"tiers":[3,4],"icon":"🔭","flavor":"Pointed at the neighbour's house."},{"id":"e_bike","name":"E-Bike","rarity":"common","w":2,"h":2,"value":210.0,"tiers":[3,4],"icon":"🚴","flavor":"Battery at 3%."},{"id":"wine_case","name":"Case of Wine","rarity":"common","w":1,"h":1,"value":112.0,"tiers":[3,4],"icon":"🍷","flavor":"Vintage: last Tuesday."},{"id":"gold_chain","name":"Gold Chain","rarity":"rare","w":1,"h":1,"value":840.0,"tiers":[3,4],"icon":"📿","flavor":"Heavier than it looks."},{"id":"designer_sofa","name":"Designer Sofa","rarity":"rare","w":2,"h":2,"value":1050.0,"tiers":[3,4],"icon":"🛋️","flavor":"Italian leather, one cat scratch."},{"id":"rare_whisky","name":"Rare Whisky","rarity":"epic","w":1,"h":1,"value":5600.0,"tiers":[3,4],"icon":"🥃","flavor":"Aged 30 years. Opened 0 times."},{"id":"sports_motorbike","name":"Sports Motorbike","rarity":"epic","w":3,"h":2,"value":8400.0,"tiers":[3,4],"icon":"🏍️","flavor":"Zero to regret in 3 seconds."},{"id":"diamond_necklace","name":"Diamond Necklace","rarity":"legendary","w":1,"h":1,"value":42000.0,"tiers":[3,4],"icon":"💎","flavor":"Certificate included."},{"id":"classic_painting","name":"Lost Painting","rarity":"legendary","w":2,"h":2,"value":63000.0,"tiers":[3,4],"icon":"🖼️","flavor":"The museum has been looking for this."},{"id":"empty_ammo_crate","name":"Empty Ammo Crate","rarity":"junk","w":1,"h":1,"value":100,"tiers":[4,5],"icon":"🗃️","flavor":"Empty. Thankfully."},{"id":"gas_mask","name":"Gas Mask","rarity":"junk","w":1,"h":1,"value":120,"tiers":[4,5],"icon":"😷","flavor":"Smells of rubber and history."},{"id":"camo_netting","name":"Camo Netting","rarity":"junk","w":2,"h":1,"value":180,"tiers":[4,5],"icon":"🥬","flavor":"You almost didn't see it."},{"id":"field_radio","name":"Field Radio","rarity":"common","w":1,"h":1,"value":800,"tiers":[4,5],"icon":"📡","flavor":"Someone is still reporting in."},{"id":"night_vision","name":"Night-Vision Goggles","rarity":"common","w":1,"h":1,"value":1500,"tiers":[4,5],"icon":"🥽","flavor":"Everything is green now."},{"id":"sat_phone","name":"Satellite Phone","rarity":"rare","w":1,"h":1,"value":8000,"tiers":[4,5],"icon":"☎️","flavor":"Three missed calls from 'HQ'."},{"id":"officer_sword","name":"Officer's Sabre","rarity":"rare","w":1,"h":2,"value":12000,"tiers":[4,5],"icon":"🗡️","flavor":"Ceremonial. Very sharp ceremony."},{"id":"army_jeep","name":"Army Jeep","rarity":"epic","w":3,"h":2,"value":90000,"tiers":[4,5],"icon":"🚙","flavor":"Keys in the ignition."},{"id":"medal_case","name":"Medal Case","rarity":"epic","w":1,"h":1,"value":60000,"tiers":[4,5],"icon":"🎖️","flavor":"A whole career in one box."},{"id":"gold_bars","name":"Gold Bars","rarity":"legendary","w":2,"h":1,"value":500000,"tiers":[4,5],"icon":"🥇","flavor":"Stamped with a bank that no longer exists."},{"id":"prototype_engine","name":"Classified Prototype","rarity":"legendary","w":2,"h":2,"value":700000,"tiers":[4,5],"icon":"🛸","flavor":"The label has been redacted."},{"id":"enigma_device","name":"Cipher Machine","rarity":"legendary","w":1,"h":1,"value":450000,"tiers":[4,5],"icon":"⌨️","flavor":"Still set to yesterday's code."},{"id":"ship_rope","name":"Coil of Ship Rope","rarity":"junk","w":1,"h":1,"value":900.0,"tiers":[5,5],"icon":"🪢","flavor":"Salty."},{"id":"barnacle_crate","name":"Barnacle Crate","rarity":"junk","w":1,"h":1,"value":1350.0,"tiers":[5,5],"icon":"🐚","flavor":"The barnacles have moved in."},{"id":"anchor_chain","name":"Anchor Chain","rarity":"junk","w":2,"h":1,"value":2100.0,"tiers":[5,5],"icon":"⛓️","flavor":"Very, very heavy."},{"id":"ship_bell","name":"Ship's Bell","rarity":"common","w":1,"h":1,"value":7500.0,"tiers":[5,5],"icon":"🔔","flavor":"Rings true after 60 years."},{"id":"porcelain_vase","name":"Porcelain Vase","rarity":"common","w":1,"h":2,"value":13500.0,"tiers":[5,5],"icon":"🏺","flavor":"Survived a shipwreck. Don't drop it."},{"id":"pirate_chest","name":"Sealed Sea Chest","rarity":"rare","w":2,"h":1,"value":90000.0,"tiers":[5,5],"icon":"🧳","flavor":"Locked. Rattles promisingly."},{"id":"captains_log","name":"Captain's Logbook","rarity":"rare","w":1,"h":1,"value":67500.0,"tiers":[5,5],"icon":"📔","flavor":"The last entry is… interesting."},{"id":"vintage_sports_car","name":"Vintage Sports Car","rarity":"epic","w":4,"h":2,"value":1050000.0,"tiers":[5,5],"icon":"🏎️","flavor":"Wrapped in oilcloth since 1962."},{"id":"crown_jewel","name":"Crown Jewel","rarity":"epic","w":1,"h":1,"value":750000.0,"tiers":[5,5],"icon":"👑","flavor":"Some kingdom wants this back."},{"id":"pharaoh_mask","name":"Golden Death Mask","rarity":"legendary","w":2,"h":2,"value":7500000.0,"tiers":[5,5],"icon":"🗿","flavor":"This should be in a museum."},{"id":"meteorite","name":"Meteorite","rarity":"legendary","w":1,"h":1,"value":5250000.0,"tiers":[5,5],"icon":"☄️","flavor":"Fell from the sky. Then fell in the sea."}]},"upgrades":{"baseStats":{"scrapePower":1,"brush":0,"autoScrape":0,"appraiser":0,"xray":0,"peekBonus":0,"tierAccess":1,"sellMult":1.0,"crew":0,"crewTier":1,"autoSellJunk":0,"luck":0},"categories":[{"id":"tools","name":"Tools","icon":"🛠️"},{"id":"knowledge","name":"Knowledge","icon":"🔍"},{"id":"access","name":"Access","icon":"🎫"},{"id":"business","name":"Business","icon":"💼"},{"id":"luck","name":"Luck","icon":"🍀"}],"upgrades":[{"id":"scraper","category":"tools","name":"Better Scraper","icon":"🪛","desc":"+1 scrape power. Rust comes off faster.","stat":"scrapePower","op":"add","perLevel":1,"maxLevel":20,"cost":{"base":60,"growth":2.1}},{"id":"brush","category":"tools","name":"Wider Blade","icon":"🧹","desc":"Scrape the tiles around your cursor too.","stat":"brush","op":"add","perLevel":1,"maxLevel":3,"cost":{"list":[250,4000,60000]}},{"id":"auto","category":"tools","name":"Auto-Scraper","icon":"🤖","desc":"+1 automatic scrape per second while you open a container.","stat":"autoScrape","op":"add","perLevel":1,"maxLevel":25,"cost":{"base":1500,"growth":1.9},"requires":[{"id":"scraper","level":2}]},{"id":"appraiser","category":"knowledge","name":"Appraiser's Eye","icon":"🧐","desc":"Valuable items glint through the rust. Level 1: Epic+, 2: Rare+, 3: every rarity.","stat":"appraiser","op":"add","perLevel":1,"maxLevel":3,"cost":{"list":[150,3000,50000]}},{"id":"peek","category":"knowledge","name":"Door Crack","icon":"🚪","desc":"+1 tile visible when you inspect a lot at the auction.","stat":"peekBonus","op":"add","perLevel":1,"maxLevel":3,"cost":{"list":[300,5000,80000]}},{"id":"xray","category":"knowledge","name":"X-Ray Scanner","icon":"🩻","desc":"Level 1: see item outlines under the rust. Level 2: also at the auction.","stat":"xray","op":"add","perLevel":1,"maxLevel":2,"cost":{"list":[8000,200000]}},{"id":"license","category":"access","name":"Auction License","icon":"🎫","desc":"Unlocks the next container class at the auction.","levelNames":["Standard 20ft","Premium 40ft","Sealed Military","Legendary Ship Cargo"],"stat":"tierAccess","op":"add","perLevel":1,"maxLevel":4,"cost":{"list":[400,3500,200000,4000000]}},{"id":"haggle","category":"business","name":"Haggling","icon":"🤝","desc":"+10% on everything you sell.","stat":"sellMult","op":"add","perLevel":0.1,"maxLevel":25,"cost":{"base":100,"growth":1.75}},{"id":"crew","category":"business","name":"Hire Crew","icon":"👷","desc":"A worker opens containers for you in the yard, even while you play.","stat":"crew","op":"add","perLevel":1,"maxLevel":20,"cost":{"base":5000,"growth":2.0},"requires":[{"id":"license","level":1}]},{"id":"crew_training","category":"business","name":"Crew Training","icon":"🎓","desc":"Your crew moves up to the next container class (Standard, then Premium). The big ones are yours to open.","stat":"crewTier","op":"add","perLevel":1,"maxLevel":2,"cost":{"list":[60000,900000]},"requires":[{"id":"crew","level":1}]},{"id":"auto_sell_junk","category":"business","name":"Junk Dealer","icon":"🗑️","desc":"Junk is sold automatically the moment it's revealed.","stat":"autoSellJunk","op":"add","perLevel":1,"maxLevel":1,"cost":{"list":[400]}},{"id":"lucky_charm","category":"luck","name":"Lucky Charm","icon":"🍀","desc":"Fewer junk rolls, more Rare, Epic and Legendary.","stat":"luck","op":"add","perLevel":1,"maxLevel":20,"cost":{"base":300,"growth":2.2}}]},"collections":{"collections":[{"id":"kitchen","name":"Kitchen Nightmare","icon":"🍳","items":["toaster","kettle","microwave","espresso_machine"],"reward":{"stat":"sellMult","add":0.03,"text":"+3% sell prices"}},{"id":"old_timer","name":"Old Timer","icon":"⏳","items":["vintage_radio","antique_clock","gold_pocket_watch"],"reward":{"stat":"scrapePower","add":1,"text":"+1 scrape power"}},{"id":"retro_gamer","name":"Retro Gamer","icon":"👾","items":["vhs_tape","game_console","arcade_cabinet","first_edition_cards"],"reward":{"stat":"sellMult","add":0.05,"text":"+5% sell prices"}},{"id":"music_lover","name":"Music Lover","icon":"🎵","items":["vinyl_record","guitar","electric_guitar","drum_kit","jukebox"],"reward":{"stat":"luck","add":1,"text":"+1 luck"}},{"id":"road_trip","name":"Road Trip","icon":"🛣️","items":["bicycle","vintage_moped","e_bike","sports_motorbike","army_jeep","vintage_sports_car"],"reward":{"stat":"crew","add":2,"text":"+2 free crew members"}},{"id":"war_museum","name":"War Museum","icon":"🎖️","items":["gas_mask","field_radio","officer_sword","medal_case","prototype_engine"],"reward":{"stat":"luck","add":2,"text":"+2 luck"}},{"id":"treasure_hunter","name":"Treasure Hunter","icon":"🏴‍☠️","items":["gold_chain","diamond_necklace","gold_bars","crown_jewel","pharaoh_mask"],"reward":{"stat":"sellMult","add":0.25,"text":"+25% sell prices"}}]}};
+
+</script>
+<script>
+/* Game rules. Must match sim/engine.py exactly for the same seed (see sim/test_parity.py).
+ * Classic script: attaches to window.DS in the browser, module.exports in Node. */
+(function (root) {
+  "use strict";
+  var RARITIES = ["junk", "common", "rare", "epic", "legendary"];
+
+  // ------------------------------------------------------------ random numbers
+  function Mulberry32(seed) { this.a = seed >>> 0; }
+  Mulberry32.prototype.next = function () {
+    this.a = (this.a + 0x6D2B79F5) >>> 0;
+    var a = this.a;
+    var t = Math.imul(a ^ (a >>> 15), 1 | a) >>> 0;
+    t = ((t + Math.imul(t ^ (t >>> 7), 61 | t)) >>> 0) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+
+  function weightedIndex(weights, u) {
+    var total = 0, i;
+    for (i = 0; i < weights.length; i++) total += weights[i];
+    var x = u * total, last = 0;
+    for (i = 0; i < weights.length; i++) {
+      if (weights[i] <= 0) continue;
+      last = i;
+      x -= weights[i];
+      if (x < 0) return i;
+    }
+    return last;
+  }
+
+  function roundHalfUp(x) { return Math.floor(x + 0.5); }
+
+  // ------------------------------------------------------------ data helpers
+  function indexData(raw) {
+    var d = {
+      config: raw.config,
+      containers: raw.containers.containers,
+      items: raw.items.items,
+      baseStats: raw.upgrades.baseStats,
+      categories: raw.upgrades.categories,
+      upgrades: raw.upgrades.upgrades,
+      collections: raw.collections.collections,
+      containerById: {}, itemById: {}, upgradeById: {}, collectionOfItem: {}
+    };
+    d.containers.forEach(function (c) { d.containerById[c.id] = c; });
+    d.items.forEach(function (i) { d.itemById[i.id] = i; });
+    d.upgrades.forEach(function (u) { d.upgradeById[u.id] = u; });
+    d.collections.forEach(function (col) {
+      col.items.forEach(function (iid) { d.collectionOfItem[iid] = col.id; });
+    });
+    return d;
+  }
+
+  function pool(d, container) {
+    var t = container.itemTier;
+    return d.items.filter(function (i) { return i.tiers[0] <= t && t <= i.tiers[1]; });
+  }
+
+  function buyableContainers(d) {
+    return d.containers.filter(function (c) { return !c.safetyNetOnly; });
+  }
+
+  // ------------------------------------------------------------ rules
+  function rarityWeights(d, container, luck) {
+    var cfg = d.config.luck;
+    return RARITIES.map(function (r) {
+      var mult = Math.max(cfg.minMult, 1 + luck * cfg.perLevel[r]);
+      return container.rarityWeights[r] * mult;
+    });
+  }
+
+  /* Fill the grid. cells[i] = index into items of the item covering cell i. */
+  function generate(d, container, luck, seed) {
+    var rng = new Mulberry32(seed);
+    var cols = container.cols, rows = container.rows, n = cols * rows, i, j, tmp;
+    var order = [];
+    for (i = 0; i < n; i++) order.push(i);
+    for (i = n - 1; i > 0; i--) {
+      j = Math.floor(rng.next() * (i + 1));
+      tmp = order[i]; order[i] = order[j]; order[j] = tmp;
+    }
+    var p = pool(d, container);
+    var weights = rarityWeights(d, container, luck);
+    var conditions = d.config.conditions;
+    var condWeights = conditions.map(function (c) { return c.weight; });
+    var cells = [], items = [];
+    for (i = 0; i < n; i++) cells.push(-1);
+
+    function fits(x, y, w, h) {
+      if (x + w > cols || y + h > rows) return false;
+      for (var dy = 0; dy < h; dy++)
+        for (var dx = 0; dx < w; dx++)
+          if (cells[(y + dy) * cols + (x + dx)] !== -1) return false;
+      return true;
+    }
+
+    for (var k = 0; k < n; k++) {
+      var cell = order[k];
+      if (cells[cell] !== -1) continue;
+      var x = cell % cols, y = Math.floor(cell / cols);
+      var rarity = RARITIES[weightedIndex(weights, rng.next())];
+      var cands = p.filter(function (it) { return it.rarity === rarity && fits(x, y, it.w, it.h); });
+      var item = cands[weightedIndex(cands.map(function (it) { return it.weight == null ? 1 : it.weight; }), rng.next())];
+      var cond = conditions[weightedIndex(condWeights, rng.next())];
+      var idx = items.length;
+      items.push({ id: item.id, x: x, y: y, w: item.w, h: item.h, rarity: rarity,
+                   condition: cond.id, value: item.value * cond.mult });
+      for (var dy = 0; dy < item.h; dy++)
+        for (var dx = 0; dx < item.w; dx++) cells[(y + dy) * cols + (x + dx)] = idx;
+    }
+    return { cells: cells, items: items };
+  }
+
+  function upgradeCost(upgrade, level) {
+    var c = upgrade.cost;
+    if (c.list) return c.list[level];
+    return roundHalfUp(c.base * Math.pow(c.growth, level));
+  }
+
+  function requirementsMet(upgrade, levels) {
+    return (upgrade.requires || []).every(function (r) { return (levels[r.id] || 0) >= r.level; });
+  }
+
+  function computeStats(d, levels, completed, stars) {
+    var s = {};
+    Object.keys(d.baseStats).forEach(function (k) { s[k] = d.baseStats[k]; });
+    d.upgrades.forEach(function (u) {
+      var lv = levels[u.id] || 0;
+      if (lv) s[u.stat] += u.perLevel * lv;
+    });
+    d.collections.forEach(function (col) {
+      if (completed && completed.indexOf(col.id) !== -1) s[col.reward.stat] += col.reward.add;
+    });
+    s.sellTotal = s.sellMult + (stars || 0) * d.config.prestige.sellBonusPerStar;
+    return s;
+  }
+
+  function prestigeStars(d, lifetime) {
+    return Math.floor(Math.sqrt(Math.max(0, lifetime) / d.config.prestige.earningsPerStarSquared));
+  }
+
+  var evCache = {};
+  function expectedValue(d, containerId, luck, samples) {
+    samples = samples || 800;
+    var key = containerId + "|" + luck + "|" + samples;
+    if (evCache[key] != null) return evCache[key];
+    var c = d.containerById[containerId], total = 0;
+    for (var s = 0; s < samples; s++) {
+      var g = generate(d, c, luck, 1000003 + s);
+      for (var i = 0; i < g.items.length; i++) total += g.items[i].value;
+    }
+    return (evCache[key] = total / samples);
+  }
+
+  function crewIncomePerSec(d, stats) {
+    if (stats.crew <= 0) return 0;
+    var tier = Math.min(stats.crewTier, stats.tierAccess);
+    var c = buyableContainers(d).filter(function (c) { return c.tier === tier; })[0];
+    var profit = expectedValue(d, c.id, stats.luck) * stats.sellTotal - c.price;
+    return stats.crew * Math.max(0, profit) / d.config.crew.secondsPerContainer;
+  }
+
+  var api = {
+    RARITIES: RARITIES, Mulberry32: Mulberry32, weightedIndex: weightedIndex,
+    roundHalfUp: roundHalfUp, indexData: indexData, pool: pool,
+    buyableContainers: buyableContainers, rarityWeights: rarityWeights, generate: generate,
+    upgradeCost: upgradeCost, requirementsMet: requirementsMet, computeStats: computeStats,
+    prestigeStars: prestigeStars, expectedValue: expectedValue, crewIncomePerSec: crewIncomePerSec
+  };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  else { root.DS = root.DS || {}; root.DS.rules = api; }
+})(this);
+
+</script>
+<script>
+/* Game state and actions. Pure logic, no DOM. Emits events through `on(fn)`.
+ * Balance numbers all come from data (window.DOCKSIDE_DATA). */
+(function (root) {
+  "use strict";
+  var R = (typeof module !== "undefined" && module.exports) ? require("./rules.js") : root.DS.rules;
+  var SAVE_KEY = "dockside-save-v1";
+  var LOT_COUNT = 3;
+
+  function Game(rawData, opts) {
+    opts = opts || {};
+    this.d = R.indexData(rawData);
+    this.listeners = [];
+    this.storage = opts.storage || null;
+    this.reset(opts.seed != null ? opts.seed : (Date.now() >>> 0));
+  }
+
+  Game.prototype.reset = function (seed) {
+    this.s = {
+      version: 1,
+      money: this.d.config.startMoney,
+      lifetime: 0,           // earnings this business (resets on prestige)
+      totalEarned: 0,        // all-time, never resets
+      levels: {},
+      collected: [],         // item ids placed in the collection book (persist)
+      completed: [],         // collection ids completed (persist)
+      stars: 0,
+      rngState: seed >>> 0,
+      lots: [],
+      current: null,
+      history: [],           // last few tallies
+      stats: { opened: 0, best: null, found: { junk: 0, common: 0, rare: 0, epic: 0, legendary: 0 } }
+    };
+    this.refreshLots();
+  };
+
+  Game.prototype.on = function (fn) { this.listeners.push(fn); };
+  Game.prototype.emit = function (type, payload) {
+    for (var i = 0; i < this.listeners.length; i++) this.listeners[i](type, payload || {});
+  };
+
+  Game.prototype.nextSeed = function () {
+    var rng = new R.Mulberry32(this.s.rngState);
+    var v = Math.floor(rng.next() * 4294967296) >>> 0;
+    this.s.rngState = rng.a;
+    return v;
+  };
+
+  Game.prototype.stats = function () {
+    return R.computeStats(this.d, this.s.levels, this.s.completed, this.s.stars);
+  };
+
+  // ------------------------------------------------------------ auction
+  Game.prototype.availableContainers = function () {
+    var access = this.stats().tierAccess;
+    return R.buyableContainers(this.d).filter(function (c) { return c.tier <= access; });
+  };
+
+  /* Lots: the best unlocked classes, newest first, so the next step up is always visible. */
+  Game.prototype.refreshLots = function () {
+    var avail = this.availableContainers().slice().reverse();
+    var lots = [];
+    for (var i = 0; i < LOT_COUNT; i++) {
+      var c = avail[Math.min(i, avail.length - 1)];
+      lots.push({ containerId: c.id, seed: this.nextSeed(), serial: 100000 + (this.nextSeed() % 900000) });
+    }
+    this.s.lots = lots;
+    this.emit("lots");
+  };
+
+  Game.prototype.lotPreview = function (lot) {
+    var c = this.d.containerById[lot.containerId];
+    var st = this.stats();
+    var g = R.generate(this.d, c, st.luck, lot.seed);
+    var peekN = c.peekTiles + st.peekBonus;
+    var rng = new R.Mulberry32(lot.seed ^ 0x5bd1e995);
+    var cells = [];
+    for (var i = 0; i < c.cols * c.rows; i++) cells.push(i);
+    var peek = [];
+    for (var k = 0; k < peekN && cells.length; k++) {
+      var j = Math.floor(rng.next() * cells.length);
+      peek.push(cells.splice(j, 1)[0]);
+    }
+    return { container: c, gen: g, peek: peek };
+  };
+
+  Game.prototype.canAfford = function (amount) { return this.s.money >= amount - 1e-9; };
+
+  Game.prototype.safetyNetAvailable = function () {
+    var cheapest = Math.min.apply(null, this.availableContainers().map(function (c) { return c.price; }));
+    return !this.s.current && this.s.money < cheapest;
+  };
+
+  Game.prototype.buyLot = function (index) {
+    if (this.s.current) return false;
+    var lot = this.s.lots[index];
+    var p = this.lotPreview(lot);
+    if (!this.canAfford(p.container.price)) return false;
+    this.s.money -= p.container.price;
+    this.startContainer(p.container, p.gen, p.peek, lot.serial);
+    this.s.lots.splice(index, 1);
+    var avail = this.availableContainers().slice().reverse();
+    this.s.lots.push({ containerId: avail[Math.min(this.s.lots.length, avail.length - 1)].id,
+                       seed: this.nextSeed(), serial: 100000 + (this.nextSeed() % 900000) });
+    this.emit("lots");
+    return true;
+  };
+
+  Game.prototype.takeScrapPile = function () {
+    if (!this.safetyNetAvailable()) return false;
+    var c = this.d.containerById[this.d.config.safetyNet.containerId];
+    var g = R.generate(this.d, c, this.stats().luck, this.nextSeed());
+    this.startContainer(c, g, [], 0);
+    return true;
+  };
+
+  Game.prototype.startContainer = function (c, gen, peek, serial) {
+    var n = c.cols * c.rows, hp = [], i;
+    for (i = 0; i < n; i++) hp.push(c.rustHp);
+    this.s.current = {
+      containerId: c.id, price: c.price, serial: serial, gen: gen, hp: hp,
+      itemState: gen.items.map(function () { return { revealed: false, sold: false, kept: false }; }),
+      found: 0, done: false
+    };
+    this.emit("start", { container: c });
+    for (i = 0; i < peek.length; i++) this.damage(peek[i], c.rustHp, true);
+  };
+
+  // ------------------------------------------------------------ scraping
+  /* Player scrapes at a tile: brush pattern around it, scrape power per tile. */
+  Game.prototype.scrape = function (cell) {
+    var cur = this.s.current;
+    if (!cur || cur.done) return;
+    var c = this.d.containerById[cur.containerId];
+    var st = this.stats();
+    var patterns = this.d.config.scraping.brushPatterns;
+    var pat = patterns[Math.min(st.brush, patterns.length - 1)];
+    var x0 = cell % c.cols, y0 = Math.floor(cell / c.cols);
+    for (var i = 0; i < pat.length; i++) {
+      var x = x0 + pat[i][0], y = y0 + pat[i][1];
+      if (x < 0 || y < 0 || x >= c.cols || y >= c.rows) continue;
+      this.damage(y * c.cols + x, st.scrapePower, false);
+    }
+  };
+
+  Game.prototype.damage = function (cell, amount, silent) {
+    var cur = this.s.current;
+    if (!cur || cur.hp[cell] <= 0) return;
+    cur.hp[cell] = Math.max(0, cur.hp[cell] - amount);
+    this.emit("tile", { cell: cell, hp: cur.hp[cell], silent: silent });
+    if (cur.hp[cell] > 0) return;
+    var idx = cur.gen.cells[cell];
+    var it = cur.gen.items[idx];
+    var c = this.d.containerById[cur.containerId];
+    // Item revealed once all its tiles are clear.
+    for (var dy = 0; dy < it.h; dy++)
+      for (var dx = 0; dx < it.w; dx++)
+        if (cur.hp[(it.y + dy) * c.cols + (it.x + dx)] > 0) return;
+    this.revealItem(idx, silent);
+  };
+
+  Game.prototype.revealItem = function (idx, silent) {
+    var cur = this.s.current;
+    var st = this.itemState(idx);
+    if (st.revealed) return;
+    st.revealed = true;
+    var it = cur.gen.items[idx];
+    var sale = it.value * this.stats().sellTotal;
+    cur.found += sale;
+    this.s.stats.found[it.rarity]++;
+    var colId = this.d.collectionOfItem[it.id];
+    var keptHere = cur.gen.items.some(function (other, j) { return j !== idx && other.id === it.id && cur.itemState[j].kept; });
+    var forCollection = !!colId && this.s.collected.indexOf(it.id) === -1 && !keptHere;
+    if (forCollection) st.kept = true;
+    this.emit("reveal", { index: idx, item: it, def: this.d.itemById[it.id], sale: sale,
+                          forCollection: forCollection, silent: silent });
+    if (!forCollection && it.rarity === "junk" && this.stats().autoSellJunk) this.sellItem(idx, true);
+    this.checkDone();
+  };
+
+  Game.prototype.itemState = function (idx) { return this.s.current.itemState[idx]; };
+
+  Game.prototype.checkDone = function () {
+    var cur = this.s.current;
+    if (cur.done) return;
+    for (var i = 0; i < cur.hp.length; i++) if (cur.hp[i] > 0) return;
+    cur.done = true;
+    var tally = { containerId: cur.containerId, paid: cur.price, found: cur.found,
+                  profit: cur.found - cur.price, serial: cur.serial };
+    this.s.stats.opened++;
+    if (cur.price > 0 && (!this.s.stats.best || tally.profit > this.s.stats.best.profit)) this.s.stats.best = tally;
+    this.s.history.unshift(tally);
+    this.s.history = this.s.history.slice(0, 8);
+    this.emit("done", tally);
+  };
+
+  /* Auto-scraper: called by the UI loop with a target chooser for cosmetics. */
+  Game.prototype.autoScrape = function (hits, pickCell) {
+    var cur = this.s.current;
+    if (!cur || cur.done) return;
+    var power = this.stats().scrapePower;
+    for (var h = 0; h < hits; h++) {
+      var open = [];
+      for (var i = 0; i < cur.hp.length; i++) if (cur.hp[i] > 0) open.push(i);
+      if (!open.length) return;
+      this.damage(pickCell(open), power, false);
+    }
+  };
+
+  // ------------------------------------------------------------ selling
+  Game.prototype.sellItem = function (idx, auto) {
+    var cur = this.s.current, st = this.itemState(idx);
+    if (!st.revealed || st.sold) return 0;
+    var it = cur.gen.items[idx];
+    var sale = it.value * this.stats().sellTotal;
+    st.sold = true; st.kept = false;
+    this.earn(sale);
+    this.emit("sold", { index: idx, sale: sale, auto: !!auto });
+    return sale;
+  };
+
+  Game.prototype.toggleKeep = function (idx) {
+    var cur = this.s.current, st = this.itemState(idx);
+    var it = cur.gen.items[idx];
+    if (st.sold || !this.d.collectionOfItem[it.id] || this.s.collected.indexOf(it.id) !== -1) return;
+    // Only one copy per collection slot: keeping this one releases any other copy.
+    if (!st.kept) cur.gen.items.forEach(function (other, j) { if (j !== idx && other.id === it.id) cur.itemState[j].kept = false; });
+    st.kept = !st.kept;
+    this.emit("keep", { index: idx, kept: st.kept });
+  };
+
+  /* Close the container: sell everything not kept, file kept items into collections. */
+  Game.prototype.finishContainer = function () {
+    var cur = this.s.current;
+    if (!cur || !cur.done) return null;
+    var sold = 0, filed = [];
+    for (var i = 0; i < cur.gen.items.length; i++) {
+      var st = cur.itemState[i], it = cur.gen.items[i];
+      if (st.kept && this.s.collected.indexOf(it.id) === -1) {
+        this.s.collected.push(it.id);
+        filed.push(it.id);
+      } else if (!st.sold) {
+        sold += this.sellItem(i, true);
+      }
+    }
+    var newlyCompleted = [];
+    var self = this;
+    this.d.collections.forEach(function (col) {
+      if (self.s.completed.indexOf(col.id) !== -1) return;
+      if (col.items.every(function (id) { return self.s.collected.indexOf(id) !== -1; })) {
+        self.s.completed.push(col.id);
+        newlyCompleted.push(col);
+      }
+    });
+    this.s.current = null;
+    this.emit("finished", { sold: sold, filed: filed, completed: newlyCompleted });
+    this.save();
+    return { sold: sold, filed: filed, completed: newlyCompleted };
+  };
+
+  Game.prototype.earn = function (amount) {
+    this.s.money += amount;
+    this.s.lifetime += amount;
+    this.s.totalEarned += amount;
+  };
+
+  // ------------------------------------------------------------ upgrades
+  Game.prototype.upgradeInfo = function (u) {
+    var lv = this.s.levels[u.id] || 0;
+    var maxed = lv >= u.maxLevel;
+    return {
+      level: lv, maxed: maxed,
+      cost: maxed ? null : R.upgradeCost(u, lv),
+      unlocked: R.requirementsMet(u, this.s.levels),
+      nextName: u.levelNames && !maxed ? u.levelNames[lv] : null
+    };
+  };
+
+  Game.prototype.buyUpgrade = function (id) {
+    var u = this.d.upgradeById[id], info = this.upgradeInfo(u);
+    if (info.maxed || !info.unlocked || !this.canAfford(info.cost)) return false;
+    var beforeAccess = this.stats().tierAccess;
+    this.s.money -= info.cost;
+    this.s.levels[id] = info.level + 1;
+    this.emit("upgrade", { upgrade: u, level: info.level + 1 });
+    if (this.stats().tierAccess !== beforeAccess) this.refreshLots();
+    else if (u.stat === "luck" || u.stat === "peekBonus") this.emit("lots");
+    this.save();
+    return true;
+  };
+
+  /* The cheapest thing the player can't afford yet: always show a next goal. */
+  Game.prototype.nextGoal = function () {
+    var best = null, self = this;
+    this.d.upgrades.forEach(function (u) {
+      var info = self.upgradeInfo(u);
+      if (info.maxed || !info.unlocked || self.canAfford(info.cost)) return;
+      if (!best || info.cost < best.cost) best = { upgrade: u, cost: info.cost };
+    });
+    return best;
+  };
+
+  // ------------------------------------------------------------ idle income and prestige
+  Game.prototype.crewRate = function () { return R.crewIncomePerSec(this.d, this.stats()); };
+
+  Game.prototype.tick = function (dt) {
+    var rate = this.crewRate();
+    if (rate > 0) this.earn(rate * dt);
+  };
+
+  Game.prototype.prestigePreview = function () {
+    return R.prestigeStars(this.d, this.s.lifetime);
+  };
+
+  Game.prototype.prestige = function () {
+    var gain = this.prestigePreview();
+    if (gain < 1 || this.s.current) return false;
+    this.s.stars += gain;
+    this.s.money = this.d.config.startMoney;
+    this.s.lifetime = 0;
+    this.s.levels = {};
+    this.refreshLots();
+    this.emit("prestige", { gain: gain, stars: this.s.stars });
+    this.save();
+    return true;
+  };
+
+  // ------------------------------------------------------------ save
+  Game.prototype.save = function () {
+    if (!this.storage) return;
+    try { this.storage.setItem(SAVE_KEY, JSON.stringify(this.s)); } catch (e) { /* storage unavailable */ }
+  };
+
+  Game.prototype.load = function () {
+    if (!this.storage) return false;
+    try {
+      var raw = this.storage.getItem(SAVE_KEY);
+      if (!raw) return false;
+      var s = JSON.parse(raw);
+      if (!s || s.version !== 1) return false;
+      this.s = s;
+      if (!this.s.lots || !this.s.lots.length) this.refreshLots();
+      return true;
+    } catch (e) { return false; }
+  };
+
+  Game.prototype.wipe = function () {
+    try { if (this.storage) this.storage.removeItem(SAVE_KEY); } catch (e) { /* ignore */ }
+    this.reset(Date.now() >>> 0);
+    this.emit("wipe");
+  };
+
+  if (typeof module !== "undefined" && module.exports) module.exports = Game;
+  else { root.DS = root.DS || {}; root.DS.Game = Game; }
+})(this);
+
+</script>
+<script>
+/* Synthesised sound (no audio files). Starts only after the first user gesture. */
+(function (root) {
+  "use strict";
+  var ctx = null, master = null, enabled = true, noiseBuf = null;
+
+  function ensure() {
+    if (!enabled) return null;
+    if (!ctx) {
+      var AC = root.AudioContext || root.webkitAudioContext;
+      if (!AC) return null;
+      ctx = new AC();
+      master = ctx.createGain();
+      master.gain.value = 0.5;
+      master.connect(ctx.destination);
+      noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
+      var data = noiseBuf.getChannelData(0);
+      for (var i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    }
+    if (ctx.state === "suspended") ctx.resume();
+    return ctx;
+  }
+
+  function tone(freq, start, dur, type, gain, glideTo) {
+    var c = ensure(); if (!c) return;
+    var t = c.currentTime + (start || 0);
+    var o = c.createOscillator(), g = c.createGain();
+    o.type = type || "sine";
+    o.frequency.setValueAtTime(freq, t);
+    if (glideTo) o.frequency.exponentialRampToValueAtTime(glideTo, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(gain || 0.2, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(master);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+
+  function noise(start, dur, freq, q, gain) {
+    var c = ensure(); if (!c) return;
+    var t = c.currentTime + (start || 0);
+    var src = c.createBufferSource(); src.buffer = noiseBuf;
+    var f = c.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = freq; f.Q.value = q || 1;
+    var g = c.createGain();
+    g.gain.setValueAtTime(gain || 0.2, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f); f.connect(g); g.connect(master);
+    src.start(t, Math.random() * 0.3); src.stop(t + dur + 0.02);
+  }
+
+  var lastScrape = 0;
+  var S = {
+    setEnabled: function (on) { enabled = on; if (!on && ctx) ctx.suspend(); if (on) ensure(); },
+    isEnabled: function () { return enabled; },
+    unlock: function () { ensure(); },
+    scrape: function () {
+      var now = performance.now();
+      if (now - lastScrape < 45) return;
+      lastScrape = now;
+      noise(0, 0.07, 1800 + Math.random() * 1600, 1.4, 0.10);
+    },
+    chip: function () { noise(0, 0.05, 3800, 3, 0.08); tone(900 + Math.random() * 300, 0, 0.04, "square", 0.02); },
+    buy: function () { noise(0, 0.25, 300, 0.8, 0.25); tone(110, 0, 0.3, "sawtooth", 0.05, 70); },
+    // Reveal sounds scale with rarity: junk is a dull thud, legendary is a fanfare.
+    reveal: function (rarity) {
+      switch (rarity) {
+        case "junk": tone(160, 0, 0.12, "triangle", 0.12, 120); break;
+        case "common": tone(520, 0, 0.14, "triangle", 0.12); break;
+        case "rare": tone(784, 0, 0.18, "sine", 0.16); tone(1175, 0.06, 0.22, "sine", 0.12); break;
+        case "epic":
+          [659, 831, 988, 1319].forEach(function (f, i) { tone(f, i * 0.07, 0.3, "triangle", 0.14); });
+          break;
+        case "legendary":
+          [523, 659, 784, 1047, 1319, 1568].forEach(function (f, i) { tone(f, i * 0.08, 0.5, "triangle", 0.16); });
+          tone(2093, 0.5, 0.9, "sine", 0.08);
+          noise(0.45, 0.8, 6000, 0.7, 0.05);
+          break;
+      }
+    },
+    // Rising tone while the last tile of a big item is about to go.
+    charge: function () { tone(220, 0, 0.45, "sawtooth", 0.05, 880); },
+    cash: function () { tone(1568, 0, 0.08, "square", 0.05); tone(2093, 0.07, 0.18, "square", 0.05); noise(0, 0.12, 5000, 2, 0.05); },
+    dud: function () { tone(330, 0, 0.25, "sawtooth", 0.07, 220); tone(247, 0.22, 0.45, "sawtooth", 0.07, 150); },
+    fanfare: function () { [392, 523, 659, 784].forEach(function (f, i) { tone(f, i * 0.1, 0.35, "triangle", 0.12); }); },
+    click: function () { tone(1200, 0, 0.03, "square", 0.03); }
+  };
+  root.DS = root.DS || {};
+  root.DS.audio = S;
+})(this);
+
+</script>
+<script>
+/* DOM presentation for the prototype. Game rules live in js/core; this file only draws
+ * and forwards input. */
+(function (root) {
+  "use strict";
+  var DS = root.DS, A = DS.audio;
+  var doc = root.document;
+  var TIER_COLORS = { 0: "#5b5046", 1: "#8b4a2b", 2: "#1f6f8b", 3: "#a8342b", 4: "#4d5b2e", 5: "#2d3e8f" };
+  var TIER_SPEC = { 0: "LOOSE PILE", 1: "10' GP", 2: "20' GP", 3: "40' HC", 4: "20' MIL-SPEC", 5: "40' REEFER" };
+  var OWNER = { 0: "----", 1: "RSTU", 2: "STDU", 3: "PRMU", 4: "MILU", 5: "SEAU" };
+  var APPRAISE = { 1: ["epic", "legendary"], 2: ["rare", "epic", "legendary"], 3: ["junk", "common", "rare", "epic", "legendary"] };
+
+  function $(sel, el) { return (el || doc).querySelector(sel); }
+  function h(tag, attrs, children) {
+    var el = doc.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      if (k === "class") el.className = attrs[k];
+      else if (k === "style") el.setAttribute("style", attrs[k]);
+      else if (k.slice(0, 2) === "on") el.addEventListener(k.slice(2), attrs[k]);
+      else if (k === "text") el.textContent = attrs[k];
+      else if (attrs[k] != null && attrs[k] !== false) el.setAttribute(k, attrs[k]);
+    });
+    (children || []).forEach(function (c) { if (c != null) el.appendChild(typeof c === "string" ? doc.createTextNode(c) : c); });
+    return el;
+  }
+
+  function money(v) {
+    var a = Math.abs(v), sign = v < 0 ? "−" : "";
+    if (a >= 1e9) return sign + "$" + (a / 1e9).toFixed(2) + "B";
+    if (a >= 1e6) return sign + "$" + (a / 1e6).toFixed(2) + "M";
+    if (a >= 1e5) return sign + "$" + (a / 1e3).toFixed(0) + "K";
+    if (a >= 10) return sign + "$" + Math.round(a).toLocaleString("en-US");
+    return sign + "$" + a.toFixed(2);
+  }
+
+  /* ISO 6346-style container code with a real check digit. */
+  function containerCode(tier, serial) {
+    var owner = OWNER[tier] || "DKSU";
+    var s = String(serial).padStart(6, "0");
+    var vals = {}, v = 10;
+    for (var c = 65; c <= 90; c++) { if (v % 11 === 0) v++; vals[String.fromCharCode(c)] = v++; }
+    var sum = 0, str = owner + s;
+    for (var i = 0; i < str.length; i++) {
+      var ch = str[i], n = /[A-Z]/.test(ch) ? vals[ch] : +ch;
+      sum += n * Math.pow(2, i);
+    }
+    var check = (sum % 11) % 10;
+    return owner + " " + s + " " + check;
+  }
+
+  // ------------------------------------------------------------------ particles
+  var fx = { canvas: null, ctx: null, parts: [] };
+  function fxInit() {
+    fx.canvas = h("canvas", { class: "fx", "aria-hidden": "true" });
+    doc.body.appendChild(fx.canvas);
+    fx.ctx = fx.canvas.getContext("2d");
+    function size() { fx.canvas.width = innerWidth * devicePixelRatio; fx.canvas.height = innerHeight * devicePixelRatio; }
+    size(); addEventListener("resize", size);
+  }
+  function burst(x, y, color, n, speed, life, sizePx, gravity) {
+    if (root.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) n = Math.ceil(n / 4);
+    for (var i = 0; i < n; i++) {
+      var a = Math.random() * Math.PI * 2, s = speed * (0.4 + Math.random());
+      fx.parts.push({ x: x, y: y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - speed * 0.4, life: life, max: life,
+                      c: Array.isArray(color) ? color[i % color.length] : color, s: sizePx * (0.5 + Math.random()), g: gravity });
+    }
+  }
+  function fxStep(dt) {
+    var c = fx.ctx, k = devicePixelRatio;
+    c.clearRect(0, 0, fx.canvas.width, fx.canvas.height);
+    for (var i = fx.parts.length - 1; i >= 0; i--) {
+      var p = fx.parts[i];
+      p.life -= dt;
+      if (p.life <= 0) { fx.parts.splice(i, 1); continue; }
+      p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+      c.globalAlpha = Math.min(1, p.life / p.max * 1.5);
+      c.fillStyle = p.c;
+      c.fillRect(p.x * k, p.y * k, p.s * k, p.s * k);
+    }
+    c.globalAlpha = 1;
+  }
+
+  // ------------------------------------------------------------------ UI
+  function UI(game, rootEl) {
+    this.g = game;
+    this.d = game.d;
+    this.el = rootEl;
+    this.tab = "upgrades";
+    this.soundOn = true;
+    this.pending = [];      // reveal animations waiting on a build-up
+    this.build();
+    fxInit();
+    var self = this;
+    game.on(function (type, p) { self.onEvent(type, p); });
+    this.renderAll();
+  }
+
+  UI.prototype.rarityColor = function (r) {
+    for (var i = 0; i < this.d.config.rarities.length; i++) if (this.d.config.rarities[i].id === r) return this.d.config.rarities[i].color;
+    return "#fff";
+  };
+  UI.prototype.rarityName = function (r) {
+    for (var i = 0; i < this.d.config.rarities.length; i++) if (this.d.config.rarities[i].id === r) return this.d.config.rarities[i].name;
+    return r;
+  };
+
+  UI.prototype.build = function () {
+    var self = this;
+    this.el.innerHTML = "";
+    this.moneyEl = h("span", { class: "value", text: "$0" });
+    this.crewEl = h("span", { class: "value", text: "$0/s" });
+    this.starsEl = h("span", { class: "value", text: "0" });
+    this.soundBtn = h("button", { class: "iconbtn", "aria-pressed": "true", onclick: function () {
+      self.soundOn = !self.soundOn; A.setEnabled(self.soundOn);
+      self.soundBtn.setAttribute("aria-pressed", String(self.soundOn));
+      self.soundBtn.textContent = self.soundOn ? "Sound on" : "Sound off";
+    } }, ["Sound on"]);
+    var top = h("header", { class: "topbar" }, [
+      h("div", { class: "brand" }, ["DOCKSIDE", h("small", { text: "PIER 4 · CONTAINER AUCTIONS" })]),
+      h("div", { class: "cash" }, [
+        h("div", { class: "stat" }, [h("span", { class: "label", text: "Yard crew" }), this.crewEl]),
+        h("div", { class: "stat" }, [h("span", { class: "label", text: "Reputation ★" }), this.starsEl]),
+        h("div", { class: "stat money" }, [h("span", { class: "label", text: "Cash" }), this.moneyEl]),
+        this.soundBtn
+      ])
+    ]);
+    this.stage = h("section", { class: "stage", "aria-live": "polite" });
+    this.tabsEl = h("div", { class: "tabs", role: "tablist" });
+    this.pane = h("div", { class: "tabpane", role: "tabpanel" });
+    var panel = h("aside", { class: "panel" }, [this.tabsEl, this.pane]);
+    this.footer = h("footer", { class: "footer" });
+    this.el.appendChild(top);
+    this.el.appendChild(h("div", { class: "layout" }, [this.stage, panel]));
+    this.el.appendChild(this.footer);
+    this.flashEl = h("div", { class: "flash" });
+    doc.body.appendChild(this.flashEl);
+    [["upgrades", "Upgrades"], ["collections", "Collections"], ["log", "Log"]].forEach(function (t) {
+      var b = h("button", { role: "tab", id: "tab-" + t[0], "aria-selected": String(self.tab === t[0]), onclick: function () {
+        self.tab = t[0]; A.click(); self.renderPanel();
+      } }, [t[1]]);
+      self.tabsEl.appendChild(b);
+    });
+  };
+
+  UI.prototype.renderAll = function () { this.renderTop(); this.renderStage(); this.renderPanel(); this.renderFooter(); };
+
+  UI.prototype.renderTop = function () {
+    this.moneyEl.textContent = money(this.g.s.money);
+    this.crewEl.textContent = money(this.g.crewRate()) + "/s";
+    this.starsEl.textContent = String(this.g.s.stars);
+  };
+
+  UI.prototype.bumpMoney = function () {
+    var el = this.moneyEl;
+    el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump");
+  };
+
+  UI.prototype.renderFooter = function () {
+    var st = this.g.s.stats, best = st.best;
+    this.footer.innerHTML = "";
+    this.footer.appendChild(h("span", { text: "Containers opened: " + st.opened }));
+    this.footer.appendChild(h("span", { text: "Legendaries found: " + st.found.legendary }));
+    if (best) this.footer.appendChild(h("span", { text: "Best container: " + money(best.profit) + " profit" }));
+    var self = this, armed = false;
+    var wipe = h("button", { class: "iconbtn", onclick: function () {
+      if (!armed) { armed = true; wipe.textContent = "Tap again to erase your save"; setTimeout(function () { armed = false; wipe.textContent = "New game"; }, 3000); return; }
+      self.g.wipe(); self.renderAll();
+    } }, ["New game"]);
+    this.footer.appendChild(wipe);
+  };
+
+  // ------------------------------------------------------------------ stage: auction
+  UI.prototype.renderStage = function () {
+    this.stage.innerHTML = "";
+    if (this.g.s.current) this.renderYard();
+    else this.renderAuction();
+  };
+
+  UI.prototype.oddsBlock = function (c) {
+    var st = this.g.stats();
+    var w = DS.rules.rarityWeights(this.d, c, st.luck), total = w.reduce(function (a, b) { return a + b; }, 0);
+    var self = this, bar = h("div", { class: "odds", "aria-hidden": "true" }), legend = h("div", { class: "odds-legend" });
+    DS.rules.RARITIES.forEach(function (r, i) {
+      var pct = w[i] / total * 100;
+      if (pct <= 0) return;
+      bar.appendChild(h("span", { style: "width:" + pct + "%;background:" + self.rarityColor(r) }));
+      legend.appendChild(h("span", {}, [h("i", { style: "background:" + self.rarityColor(r) }), self.rarityName(r) + " " + (pct < 1 ? pct.toFixed(2) : pct.toFixed(1)) + "%"]));
+    });
+    return [h("div", { class: "peek-label", text: "Odds per item" }), bar, legend];
+  };
+
+  UI.prototype.renderAuction = function () {
+    var self = this, g = this.g;
+    var access = g.stats().tierAccess;
+    this.stage.appendChild(h("div", { class: "stage-head" }, [
+      h("h2", { text: "Today's lots" }),
+      h("span", { class: "sub", text: "Peek through the door crack, check the odds, place your bid." })
+    ]));
+    var lots = h("div", { class: "lots" });
+    g.s.lots.forEach(function (lot, i) {
+      var p = g.lotPreview(lot), c = p.container;
+      var peek = h("div", { class: "peek", style: "grid-template-columns:repeat(" + c.cols + ",1fr)" });
+      var seen = {}; p.peek.forEach(function (cell) { seen[cell] = true; });
+      var xray = g.stats().xray >= 2;
+      for (var k = 0; k < c.cols * c.rows; k++) {
+        var it = p.gen.items[p.gen.cells[k]];
+        if (seen[k]) {
+          peek.appendChild(h("div", { class: "pc seen", style: "--rc:" + self.rarityColor(it.rarity), title: self.rarityName(it.rarity) }, [self.d.itemById[it.id].icon]));
+        } else {
+          peek.appendChild(h("div", { class: "pc" + (xray && (it.w > 1 || it.h > 1) ? " outline" : "") }));
+        }
+      }
+      var afford = g.canAfford(c.price);
+      var card = h("article", { class: "lot" }, [
+        h("div", { class: "box", style: "--c:" + TIER_COLORS[c.tier] }, [
+          h("div", { class: "code", text: containerCode(c.tier, lot.serial) }),
+          h("div", { class: "spec", text: TIER_SPEC[c.tier] + " · " + c.cols * c.rows + " TILES" }),
+          h("span", { class: "tierbadge", text: "CLASS " + c.tier })
+        ]),
+        h("div", { class: "body" }, [
+          h("h3", { text: c.name }),
+          h("p", { class: "blurb", text: c.blurb }),
+          h("div", { class: "peek-label", text: "Door crack · " + p.peek.length + " tiles visible" }),
+          peek
+        ].concat(self.oddsBlock(c)).concat([
+          h("button", { class: "btn wide buy", disabled: afford ? null : "disabled", onclick: function () {
+            A.unlock(); if (g.buyLot(i)) A.buy();
+          } }, [afford ? "Buy for " + money(c.price) : "Need " + money(c.price)])
+        ]))
+      ]);
+      lots.appendChild(card);
+    });
+    this.stage.appendChild(lots);
+    if (g.safetyNetAvailable()) {
+      var sc = this.d.containerById[this.d.config.safetyNet.containerId];
+      this.stage.appendChild(h("div", { class: "lot", style: "margin-top:14px" }, [
+        h("div", { class: "body" }, [
+          h("h3", { text: "Out of cash? " + sc.name }),
+          h("p", { class: "blurb", text: sc.blurb + " Free to pick through while you can't afford a lot." }),
+          h("button", { class: "btn ghost wide", onclick: function () { A.unlock(); g.takeScrapPile(); } }, ["Pick through it"])
+        ])
+      ]));
+    }
+    var next = this.d.containers.filter(function (c) { return c.tier === access + 1; })[0];
+    if (next) this.stage.appendChild(h("p", { class: "hint", text: "Next class: " + next.name + " — buy an Auction License upgrade to bid on it." }));
+  };
+
+  // ------------------------------------------------------------------ stage: the open container
+  UI.prototype.renderYard = function () {
+    var self = this, g = this.g, cur = g.s.current, c = this.d.containerById[cur.containerId];
+    var st = g.stats();
+    this.paidEl = h("span", { class: "v", text: money(cur.price) });
+    this.foundEl = h("span", { class: "v", text: money(cur.found) });
+    this.profitEl = h("span", { class: "v" });
+    var head = h("div", { class: "stage-head" }, [
+      h("h2", { text: c.name }),
+      h("span", { class: "sub", text: cur.serial ? containerCode(c.tier, cur.serial) : "Free pile" })
+    ]);
+    var meter = h("div", { class: "meter" }, [
+      h("div", {}, [h("span", { class: "k", text: "Paid" }), this.paidEl]),
+      h("div", {}, [h("span", { class: "k", text: "Found" }), this.foundEl]),
+      h("div", {}, [h("span", { class: "k", text: "Profit" }), this.profitEl])
+    ]);
+    var vars = "--cols:" + c.cols + ";--rows:" + c.rows;
+    this.gridEl = h("div", { class: "grid", style: vars, role: "application", "aria-label": "Container. Drag across the rust to scrape it off." });
+    this.itemEls = [];
+    cur.gen.items.forEach(function (it, idx) {
+      var def = self.d.itemById[it.id], ist = cur.itemState[idx];
+      var el = h("div", {
+        class: "item r-" + it.rarity + (ist.revealed ? " revealed" : "") + (ist.sold ? " sold" : ""),
+        style: "grid-column:" + (it.x + 1) + " / span " + it.w + ";grid-row:" + (it.y + 1) + " / span " + it.h +
+               ";--rc:" + self.rarityColor(it.rarity) + ";--iw:" + it.w + ";--ih:" + it.h
+      }, [h("span", { class: "glyph", text: def.icon })]);
+      if (ist.revealed) self.decorateItem(idx, el);
+      self.itemEls.push(el);
+      self.gridEl.appendChild(el);
+    });
+    this.tilesEl = h("div", { class: "tiles", style: vars });
+    this.tileEls = [];
+    for (var i = 0; i < cur.hp.length; i++) {
+      var t = h("div", { class: "tile" + (cur.hp[i] <= 0 ? " gone" : "") });
+      t.style.setProperty("--hp", String(cur.hp[i] / c.rustHp));
+      this.tileEls.push(t);
+      this.tilesEl.appendChild(t);
+    }
+    this.gridEl.appendChild(this.tilesEl);
+    if (st.xray >= 1) {
+      var xr = h("div", { class: "xray", style: vars, "aria-hidden": "true" });
+      cur.gen.items.forEach(function (it) {
+        if (it.w * it.h > 1) xr.appendChild(h("div", { style: "grid-column:" + (it.x + 1) + " / span " + it.w + ";grid-row:" + (it.y + 1) + " / span " + it.h }));
+      });
+      this.gridEl.appendChild(xr);
+    }
+    var frame = h("div", { class: "frame", style: "--c:" + TIER_COLORS[c.tier] + ";margin-top:22px" }, [this.gridEl]);
+    this.findsEl = h("div", { class: "finds" });
+    var yard = h("div", { class: "yard" }, [head, meter, frame,
+      h("p", { class: "hint", text: "Drag across the rust to scrape. Hold still to keep scraping." }), this.findsEl]);
+    this.stage.appendChild(yard);
+    this.bindScrape();
+    this.updateMeter();
+    this.updateGlints();
+    cur.gen.items.forEach(function (it, idx) { if (cur.itemState[idx].revealed) self.addFind(idx, false); });
+    if (cur.done) this.showTally({ paid: cur.price, found: cur.found, profit: cur.found - cur.price, containerId: cur.containerId }, true);
+  };
+
+  UI.prototype.decorateItem = function (idx, el) {
+    var cur = this.g.s.current, it = cur.gen.items[idx], ist = cur.itemState[idx];
+    var sale = it.value * this.g.stats().sellTotal;
+    if (!el.querySelector(".tag")) el.appendChild(h("span", { class: "tag", text: money(sale) }));
+    var k = el.querySelector(".keep");
+    if (ist.kept && !k) el.appendChild(h("span", { class: "keep", title: "Kept for a collection", text: "📌" }));
+    if (!ist.kept && k) k.remove();
+    el.classList.toggle("sold", !!ist.sold);
+  };
+
+  UI.prototype.updateMeter = function () {
+    var cur = this.g.s.current; if (!cur || !this.foundEl) return;
+    this.foundEl.textContent = money(cur.found);
+    var p = cur.found - cur.price;
+    this.profitEl.textContent = (p >= 0 ? "+" : "") + money(p);
+    this.profitEl.className = "v " + (p >= 0 ? "gain" : "loss");
+  };
+
+  /* Honest glints: appraiser level, or a big item already partly uncovered. */
+  UI.prototype.updateGlints = function () {
+    var cur = this.g.s.current; if (!cur || !this.tileEls) return;
+    var lvl = this.g.stats().appraiser, show = APPRAISE[Math.min(3, lvl)] || [];
+    var partial = {};
+    var c = this.d.containerById[cur.containerId];
+    cur.gen.items.forEach(function (it, idx) {
+      if (cur.itemState[idx].revealed || (it.rarity !== "epic" && it.rarity !== "legendary")) return;
+      for (var dy = 0; dy < it.h; dy++) for (var dx = 0; dx < it.w; dx++)
+        if (cur.hp[(it.y + dy) * c.cols + it.x + dx] <= 0) partial[idx] = true;
+    });
+    for (var i = 0; i < this.tileEls.length; i++) {
+      var t = this.tileEls[i];
+      if (cur.hp[i] <= 0) { t.classList.remove("glint"); continue; }
+      var idx = cur.gen.cells[i], it = cur.gen.items[idx];
+      var on = show.indexOf(it.rarity) !== -1 || partial[idx];
+      t.classList.toggle("glint", !!on);
+      if (on) t.style.setProperty("--gc", this.rarityColor(it.rarity));
+    }
+  };
+
+  UI.prototype.bindScrape = function () {
+    var self = this, grid = this.gridEl, down = false, lastCell = -1, holdTimer = null;
+    var repeatMs = this.d.config.scraping.holdRepeatMs;
+    function cellAt(e) {
+      var r = grid.getBoundingClientRect(), c = self.d.containerById[self.g.s.current.containerId];
+      var x = Math.floor((e.clientX - r.left) / r.width * c.cols), y = Math.floor((e.clientY - r.top) / r.height * c.rows);
+      if (x < 0 || y < 0 || x >= c.cols || y >= c.rows) return -1;
+      return y * c.cols + x;
+    }
+    function hit(cell, e) {
+      if (cell < 0 || !self.g.s.current || self.g.s.current.done) return;
+      self.lastPointer = { x: e.clientX, y: e.clientY };
+      self.g.scrape(cell);
+    }
+    function stopHold() { if (holdTimer) { clearInterval(holdTimer); holdTimer = null; } }
+    grid.addEventListener("pointerdown", function (e) {
+      A.unlock();
+      down = true; grid.setPointerCapture(e.pointerId);
+      lastCell = cellAt(e); hit(lastCell, e);
+      stopHold();
+      holdTimer = setInterval(function () { if (down) hit(lastCell, self.lastPointer ? { clientX: self.lastPointer.x, clientY: self.lastPointer.y } : e); }, repeatMs);
+      e.preventDefault();
+    });
+    grid.addEventListener("pointermove", function (e) {
+      if (!down) return;
+      var cell = cellAt(e);
+      self.lastPointer = { x: e.clientX, y: e.clientY };
+      if (cell !== lastCell) { lastCell = cell; hit(cell, e); }
+    });
+    function up() { down = false; stopHold(); }
+    grid.addEventListener("pointerup", up);
+    grid.addEventListener("pointercancel", up);
+    grid.addEventListener("lostpointercapture", up);
+  };
+
+  UI.prototype.tileCenter = function (cell) {
+    var t = this.tileEls && this.tileEls[cell]; if (!t) return { x: innerWidth / 2, y: innerHeight / 2 };
+    var r = t.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  };
+
+  UI.prototype.itemCenter = function (idx) {
+    var el = this.itemEls && this.itemEls[idx]; if (!el) return { x: innerWidth / 2, y: innerHeight / 2 };
+    var r = el.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  };
+
+  UI.prototype.floatText = function (x, y, text, color, big) {
+    var el = h("div", { class: "float" + (big ? " big" : ""), style: "left:" + x + "px;top:" + y + "px;--fc:" + color, text: text });
+    doc.body.appendChild(el);
+    setTimeout(function () { el.remove(); }, 1200);
+  };
+
+  UI.prototype.flash = function (color) {
+    this.flashEl.style.setProperty("--fc", color);
+    this.flashEl.classList.remove("on"); void this.flashEl.offsetWidth; this.flashEl.classList.add("on");
+  };
+  UI.prototype.shake = function () {
+    this.stage.classList.remove("shake"); void this.stage.offsetWidth; this.stage.classList.add("shake");
+  };
+  UI.prototype.banner = function (text, sub, color) {
+    var b = h("div", { class: "banner", style: "--bc:" + color }, [h("b", { text: text }), h("span", { text: sub })]);
+    this.stage.appendChild(b);
+    setTimeout(function () { b.remove(); }, 1900);
+  };
+
+  UI.prototype.addFind = function (idx, animate) {
+    var cur = this.g.s.current, it = cur.gen.items[idx], def = this.d.itemById[it.id], ist = cur.itemState[idx];
+    if (it.rarity === "junk" && !this.d.collectionOfItem[it.id]) return;  // keep the list about the good stuff
+    var cond = this.d.config.conditions.filter(function (c) { return c.id === it.condition; })[0];
+    var colId = this.d.collectionOfItem[it.id];
+    var colNote = null;
+    if (ist.kept && colId) {
+      var col = this.d.collections.filter(function (c) { return c.id === colId; })[0];
+      var have = col.items.filter(function (id) { return this.g.s.collected.indexOf(id) !== -1; }, this).length + 1;
+      colNote = h("small", { text: "📌 " + col.name + " " + have + "/" + col.items.length });
+    }
+    var row = h("div", { class: "find" + (colNote ? " col" : ""), style: "--rc:" + this.rarityColor(it.rarity) }, [
+      h("span", { class: "ico", text: def.icon }),
+      h("span", { class: "n" }, [def.name, h("small", { text: cond.name + " · " + this.rarityName(it.rarity) }), colNote]),
+      h("span", { class: "val", text: money(it.value * this.g.stats().sellTotal) })
+    ]);
+    this.findsEl.insertBefore(row, this.findsEl.firstChild);
+    if (animate) row.animate([{ opacity: 0, transform: "translateY(-6px)" }, { opacity: 1, transform: "none" }], { duration: 220 });
+  };
+
+  // ------------------------------------------------------------------ events
+  UI.prototype.onEvent = function (type, p) {
+    var self = this;
+    switch (type) {
+      case "lots": case "wipe": case "prestige":
+        if (!this.g.s.current) this.renderStage();
+        this.renderTop(); this.renderPanel(); this.renderFooter();
+        if (type === "prestige") { A.fanfare(); this.toast("Business sold. +" + p.gain + " reputation ★ — everything sells for more now."); }
+        break;
+      case "start":
+        this.renderStage();
+        this.renderTop();
+        break;
+      case "tile": {
+        var t = this.tileEls && this.tileEls[p.cell]; if (!t) break;
+        var c = this.d.containerById[this.g.s.current.containerId];
+        t.style.setProperty("--hp", String(p.hp / c.rustHp));
+        if (p.silent) { if (p.hp <= 0) t.classList.add("gone"); break; }
+        var pos = this.tileCenter(p.cell);
+        if (p.hp <= 0) {
+          t.classList.add("gone");
+          A.chip();
+          burst(pos.x, pos.y, ["#7a3b1d", "#a4552a", "#5a2a15", "#c77a45"], 7, 160, 0.6, 4, 520);
+          this.updateGlints();
+        } else {
+          t.classList.add("hit"); setTimeout(function () { t.classList.remove("hit"); }, 90);
+          A.scrape();
+          burst(pos.x, pos.y, ["#7a3b1d", "#a4552a"], 2, 90, 0.35, 3, 500);
+        }
+        break;
+      }
+      case "reveal": this.onReveal(p); break;
+      case "sold":
+        if (this.itemEls && this.itemEls[p.index]) this.decorateItem(p.index, this.itemEls[p.index]);
+        this.renderTop(); this.bumpMoney();
+        if (p.auto && this.g.s.current && !this.g.s.current.done) {
+          var pc = this.itemCenter(p.index);
+          this.floatText(pc.x, pc.y - 10, "+" + money(p.sale), "#8a8f98");
+        }
+        break;
+      case "done":
+        setTimeout(function () { self.showTally(p, false); }, 550);
+        break;
+      case "finished":
+        if (p.completed.length) {
+          A.fanfare();
+          this.toast("Collection complete: " + p.completed.map(function (c) { return c.name + " (" + c.reward.text + ")"; }).join(", "));
+        } else if (p.filed.length) {
+          this.toast("Filed " + p.filed.length + " item" + (p.filed.length > 1 ? "s" : "") + " in your collection book.");
+        }
+        this.renderAll();
+        break;
+      case "upgrade":
+        A.cash();
+        this.renderTop(); this.renderPanel();
+        if (this.g.s.current) { this.updateGlints(); }
+        else this.renderStage();
+        break;
+      case "keep":
+        if (this.itemEls) this.itemEls.forEach(function (el, i) { self.decorateItem(i, el); });
+        if (this.stage.querySelector(".tally") && this.g.s.current) {
+          var cur = this.g.s.current;
+          this.showTally({ paid: cur.price, found: cur.found, profit: cur.found - cur.price, containerId: cur.containerId }, true);
+        }
+        break;
+    }
+  };
+
+  UI.prototype.onReveal = function (p) {
+    var self = this, it = p.item, color = this.rarityColor(it.rarity);
+    var el = this.itemEls && this.itemEls[p.index];
+    this.updateMeter();
+    if (p.silent) { if (el) { el.classList.add("revealed"); this.decorateItem(p.index, el); } this.addFind(p.index, false); return; }
+    var big = it.rarity === "epic" || it.rarity === "legendary";
+    function payoff() {
+      if (!el) return;
+      el.classList.add("revealed"); self.decorateItem(p.index, el);
+      var c = self.itemCenter(p.index);
+      A.reveal(it.rarity);
+      var n = { junk: 4, common: 10, rare: 24, epic: 60, legendary: 140 }[it.rarity];
+      burst(c.x, c.y, [color, "#ffffff", color], n, big ? 380 : 220, big ? 1.2 : 0.7, big ? 5 : 4, 300);
+      self.floatText(c.x, c.y - 16, "+" + money(p.sale), color, big);
+      if (big) {
+        self.flash(color); self.shake();
+        self.banner(it.rarity === "legendary" ? "LEGENDARY!" : "EPIC FIND", p.def.name + " · " + money(p.sale), color);
+      }
+      if (p.forCollection) setTimeout(function () { self.toast("New for your collection: " + p.def.name + " 📌"); }, big ? 900 : 100);
+      self.addFind(p.index, true);
+    }
+    if (big && !(root.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+      // Build-up: the result is already decided; this only stages it.
+      A.charge();
+      if (el) el.animate([{ transform: "scale(1)" }, { transform: "scale(1.04) rotate(-1deg)" }, { transform: "scale(.98) rotate(1deg)" }, { transform: "scale(1)" }], { duration: 420 });
+      setTimeout(payoff, 420);
+    } else payoff();
+  };
+
+  // ------------------------------------------------------------------ tally
+  UI.prototype.showTally = function (t, restoring) {
+    var self = this, g = this.g, cur = g.s.current;
+    if (!cur) return;
+    var old = this.stage.querySelector(".tally"); if (old) old.remove();
+    var c = this.d.containerById[t.containerId];
+    var profit = t.found - t.paid, ratio = t.paid > 0 ? t.found / t.paid : null;
+    var verdict, cls = profit >= 0 ? "gain" : "loss";
+    if (t.paid === 0) verdict = "Free finds are the best finds.";
+    else if (ratio >= 5) verdict = "Jackpot. " + ratio.toFixed(1) + "× your money.";
+    else if (ratio >= 1.5) verdict = "Big score. " + ratio.toFixed(1) + "× your money.";
+    else if (profit >= 0) verdict = "Small profit. Every dollar counts.";
+    else if (ratio >= 0.6) verdict = "Close, but a loss this time.";
+    else verdict = "A dud. It happens to the best of us.";
+    var keeps = h("div", { class: "keeps" });
+    cur.gen.items.forEach(function (it, idx) {
+      var colId = self.d.collectionOfItem[it.id], ist = cur.itemState[idx];
+      if (!colId || ist.sold || g.s.collected.indexOf(it.id) !== -1) return;
+      var col = self.d.collections.filter(function (x) { return x.id === colId; })[0], def = self.d.itemById[it.id];
+      var id = "keep-" + idx;
+      var cb = h("input", { type: "checkbox", id: id, checked: ist.kept ? "checked" : null, onchange: function () { g.toggleKeep(idx); } });
+      keeps.appendChild(h("div", { class: "keeprow" }, [
+        h("label", { for: id }, [cb, h("span", { text: def.icon + " Keep " + def.name }), h("small", { text: "for " + col.name + " — or sell for " + money(it.value * g.stats().sellTotal) })])
+      ]));
+    });
+    var card = h("div", { class: "card", role: "dialog", "aria-label": "Container tally" }, [
+      h("h3", { text: c.name + " — tally" }),
+      h("div", { class: "rows" }, [
+        h("div", {}, [h("span", { class: "k", text: "Paid" }), h("span", { class: "v", text: money(t.paid) })]),
+        h("div", {}, [h("span", { class: "k", text: "Found" }), h("span", { class: "v", text: money(t.found) })]),
+        h("div", {}, [h("span", { class: "k", text: "Profit" }), h("span", { class: "v " + cls, style: "color:var(--" + cls + ")", text: (profit >= 0 ? "+" : "") + money(profit) })])
+      ]),
+      h("div", { class: "verdict", text: verdict }),
+      keeps.childNodes.length ? h("div", { class: "peek-label", text: "Collection items" }) : null,
+      keeps.childNodes.length ? keeps : null,
+      h("button", { class: "btn wide", id: "tally-continue", onclick: function () { A.cash(); g.finishContainer(); } }, ["Sell the rest & back to the auction"])
+    ]);
+    var wrap = h("div", { class: "tally " + cls }, [card]);
+    this.stage.appendChild(wrap);
+    if (!restoring && t.paid > 0) {
+      if (profit < 0) A.dud();
+      else if (ratio >= 1.5) { A.fanfare(); var r = card.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + 40, ["#5bd68e", "#ffae42", "#ffffff"], 50, 300, 1.1, 4, 350); }
+      else A.cash();
+    }
+    var btn = card.querySelector("#tally-continue"); if (btn) btn.focus({ preventScroll: true });
+  };
+
+  // ------------------------------------------------------------------ panel
+  UI.prototype.renderPanel = function () {
+    var self = this;
+    Array.prototype.forEach.call(this.tabsEl.children, function (b) { b.setAttribute("aria-selected", String(b.id === "tab-" + self.tab)); });
+    this.pane.innerHTML = "";
+    if (this.tab === "upgrades") this.renderUpgrades();
+    else if (this.tab === "collections") this.renderCollections();
+    else this.renderLog();
+  };
+
+  UI.prototype.renderUpgrades = function () {
+    var self = this, g = this.g;
+    this.upButtons = [];
+    this.goalEl = h("div", { class: "goal" });
+    this.pane.appendChild(this.goalEl);
+    this.updateGoal();
+    this.d.categories.forEach(function (cat) {
+      var ups = self.d.upgrades.filter(function (u) { return u.category === cat.id; });
+      self.pane.appendChild(h("div", { class: "cat", text: cat.name }));
+      ups.forEach(function (u) {
+        var info = g.upgradeInfo(u);
+        var pips = u.maxLevel <= 12 ? "●".repeat(info.level) + "○".repeat(u.maxLevel - info.level) : "Level " + info.level + " / " + u.maxLevel;
+        var title = u.name + (info.nextName ? ": " + info.nextName : "");
+        var btn = h("button", { class: "btn", onclick: function () { A.unlock(); g.buyUpgrade(u.id); } },
+                    [info.maxed ? "Maxed" : money(info.cost)]);
+        var row = h("div", { class: "up" + (info.unlocked ? "" : " locked") + (info.maxed ? " maxed" : "") }, [
+          h("span", { class: "ico", text: u.icon }),
+          h("div", {}, [
+            h("div", { class: "t", text: title }),
+            h("div", { class: "pips", text: pips }),
+            h("div", { class: "d", text: info.unlocked ? u.desc : "Requires " + (u.requires || []).map(function (r) { return self.d.upgradeById[r.id].name + " " + r.level; }).join(", ") })
+          ]),
+          btn
+        ]);
+        self.upButtons.push({ btn: btn, u: u });
+        self.pane.appendChild(row);
+      });
+    });
+    var gain = g.prestigePreview(), armed = false;
+    var pbtn = h("button", { class: "btn ghost wide", disabled: gain >= 1 && !g.s.current ? null : "disabled", onclick: function () {
+      if (!armed) { armed = true; pbtn.textContent = "Tap again: reset cash & upgrades for +" + gain + " ★"; return; }
+      g.prestige();
+    } }, [gain >= 1 ? "Sell the business for +" + gain + " ★" : "Not worth selling yet"]);
+    this.prestigeBtn = pbtn;
+    this.pane.appendChild(h("div", { class: "prestige" }, [
+      h("h4", { text: "Sell the business" }),
+      h("div", { text: "Start over with a better reputation. Each ★ adds +" + Math.round(this.d.config.prestige.sellBonusPerStar * 100) + "% to everything you sell, forever. Collections are kept." }),
+      h("div", { class: "d", text: "Earned this business: " + money(g.s.lifetime) + ". Next ★ at " + money(Math.pow(gain + 1, 2) * this.d.config.prestige.earningsPerStarSquared) + "." }),
+      pbtn
+    ]));
+    this.updateAffordability();
+  };
+
+  UI.prototype.updateGoal = function () {
+    if (!this.goalEl) return;
+    var goal = this.g.nextGoal();
+    this.goalEl.innerHTML = "";
+    if (!goal) { this.goalEl.appendChild(h("b", { text: "Everything affordable is yours. Open bigger containers!" })); return; }
+    var pct = Math.max(0, Math.min(100, this.g.s.money / goal.cost * 100));
+    this.goalEl.appendChild(h("div", {}, [h("b", { text: "Next goal: " }), goal.upgrade.icon + " " + goal.upgrade.name + " — " + money(goal.cost)]));
+    var bar = h("div", { class: "bar" }, [h("i", { style: "width:" + pct + "%" })]);
+    this.goalEl.appendChild(bar);
+  };
+
+  UI.prototype.updateAffordability = function () {
+    var g = this.g;
+    (this.upButtons || []).forEach(function (o) {
+      var info = g.upgradeInfo(o.u);
+      o.btn.disabled = info.maxed || !info.unlocked || !g.canAfford(info.cost);
+    });
+    this.updateGoal();
+  };
+
+  UI.prototype.renderCollections = function () {
+    var self = this, g = this.g;
+    this.pane.appendChild(h("div", { class: "d", style: "color:var(--muted);font-size:13px", text: "Keep the first copy of each item to complete a set. Rewards are permanent, even after you sell the business." }));
+    this.d.collections.forEach(function (col) {
+      var have = col.items.filter(function (id) { return g.s.collected.indexOf(id) !== -1; }).length;
+      var done = g.s.completed.indexOf(col.id) !== -1;
+      var slots = h("div", { class: "slots" });
+      col.items.forEach(function (id) {
+        var def = self.d.itemById[id], got = g.s.collected.indexOf(id) !== -1;
+        slots.appendChild(h("div", { class: "slot" + (got ? "" : " empty"), style: "--rc:" + self.rarityColor(def.rarity), title: def.name + (got ? "" : " (not found yet)") }, [got ? def.icon : "?"]));
+      });
+      self.pane.appendChild(h("div", { class: "col-card" + (done ? " done" : "") }, [
+        h("header", {}, [h("b", { text: col.icon + " " + col.name }), h("span", { class: "pips", style: "font-family:var(--font-num)", text: have + " / " + col.items.length })]),
+        h("div", { class: "reward", text: (done ? "Complete: " : "Reward: ") + col.reward.text }),
+        slots,
+        h("div", { class: "reward", text: col.items.map(function (id) { return self.d.itemById[id].name; }).join(" · ") })
+      ]));
+    });
+  };
+
+  UI.prototype.renderLog = function () {
+    var self = this, list = h("ul", { class: "log" });
+    if (!this.g.s.history.length) list.appendChild(h("li", { text: "No containers opened yet. Buy your first lot." }));
+    this.g.s.history.forEach(function (t) {
+      var c = self.d.containerById[t.containerId];
+      list.appendChild(h("li", {}, [h("span", { text: c.name + (t.serial ? " · " + containerCode(c.tier, t.serial) : "") }),
+        h("span", { class: t.profit >= 0 ? "gain" : "loss", text: (t.profit >= 0 ? "+" : "") + money(t.profit) })]));
+    });
+    this.pane.appendChild(list);
+  };
+
+  UI.prototype.toast = function (text) {
+    var old = doc.querySelector(".toast"); if (old) old.remove();
+    var t = h("div", { class: "toast", role: "status", text: text });
+    doc.body.appendChild(t);
+    setTimeout(function () { t.remove(); }, 3200);
+  };
+
+  // ------------------------------------------------------------------ frame loop
+  UI.prototype.loop = function () {
+    var self = this, last = performance.now(), acc = 0, autoAcc = 0, saveAcc = 0;
+    function frame(now) {
+      var dt = Math.min(0.1, (now - last) / 1000); last = now;
+      self.g.tick(dt);
+      var st = self.g.stats();
+      if (st.autoScrape > 0 && self.g.s.current && !self.g.s.current.done) {
+        autoAcc += st.autoScrape * dt;
+        var hits = Math.floor(autoAcc);
+        if (hits > 0) {
+          autoAcc -= hits;
+          self.g.autoScrape(hits, function (open) { return open[Math.floor(Math.random() * open.length)]; });
+        }
+      }
+      fxStep(dt);
+      acc += dt; saveAcc += dt;
+      if (acc > 0.25) { acc = 0; self.renderTop(); if (self.tab === "upgrades") self.updateAffordability(); }
+      if (saveAcc > 5) { saveAcc = 0; self.g.save(); }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  };
+
+  DS.UI = UI;
+  DS.fmt = { money: money, containerCode: containerCode };
+})(this);
+
+</script>
+<script>
+/* Boot: load data, restore the save, start the UI. */
+(function (root) {
+  "use strict";
+  var DS = root.DS;
+
+  function safeStorage() {
+    try {
+      var k = "__dockside_probe";
+      root.localStorage.setItem(k, "1");
+      root.localStorage.removeItem(k);
+      return root.localStorage;
+    } catch (e) { return null; }
+  }
+
+  function start(hotData) {
+    var game = new DS.Game(root.DOCKSIDE_DATA, { storage: safeStorage() });
+    if (hotData && hotData.state) game.s = hotData.state;
+    else game.load();
+    var ui = new DS.UI(game, document.getElementById("app"));
+    ui.loop();
+    root.dockside = { game: game, ui: ui };   // handy for debugging and tests
+    if (root.claude && root.claude.hot && root.claude.hot.snapshot) {
+      root.claude.hot.snapshot(function () { return { state: game.s }; });
+    }
+  }
+
+  if (root.claude && root.claude.hot && root.claude.hot.ready) root.claude.hot.ready(start);
+  else start(root.claude && root.claude.hot ? root.claude.hot.data : null);
+})(this);
+
+</script>

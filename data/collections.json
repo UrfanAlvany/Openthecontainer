@@ -1,0 +1,39 @@
+{
+  "collections": [
+    {
+      "id": "kitchen", "name": "Kitchen Nightmare", "icon": "🍳",
+      "items": ["toaster", "kettle", "microwave", "espresso_machine"],
+      "reward": { "stat": "sellMult", "add": 0.03, "text": "+3% sell prices" }
+    },
+    {
+      "id": "old_timer", "name": "Old Timer", "icon": "⏳",
+      "items": ["vintage_radio", "antique_clock", "gold_pocket_watch"],
+      "reward": { "stat": "scrapePower", "add": 1, "text": "+1 scrape power" }
+    },
+    {
+      "id": "retro_gamer", "name": "Retro Gamer", "icon": "👾",
+      "items": ["vhs_tape", "game_console", "arcade_cabinet", "first_edition_cards"],
+      "reward": { "stat": "sellMult", "add": 0.05, "text": "+5% sell prices" }
+    },
+    {
+      "id": "music_lover", "name": "Music Lover", "icon": "🎵",
+      "items": ["vinyl_record", "guitar", "electric_guitar", "drum_kit", "jukebox"],
+      "reward": { "stat": "luck", "add": 1, "text": "+1 luck" }
+    },
+    {
+      "id": "road_trip", "name": "Road Trip", "icon": "🛣️",
+      "items": ["bicycle", "vintage_moped", "e_bike", "sports_motorbike", "army_jeep", "vintage_sports_car"],
+      "reward": { "stat": "crew", "add": 2, "text": "+2 free crew members" }
+    },
+    {
+      "id": "war_museum", "name": "War Museum", "icon": "🎖️",
+      "items": ["gas_mask", "field_radio", "officer_sword", "medal_case", "prototype_engine"],
+      "reward": { "stat": "luck", "add": 2, "text": "+2 luck" }
+    },
+    {
+      "id": "treasure_hunter", "name": "Treasure Hunter", "icon": "🏴‍☠️",
+      "items": ["gold_chain", "diamond_necklace", "gold_bars", "crown_jewel", "pharaoh_mask"],
+      "reward": { "stat": "sellMult", "add": 0.25, "text": "+25% sell prices" }
+    }
+  ]
+}

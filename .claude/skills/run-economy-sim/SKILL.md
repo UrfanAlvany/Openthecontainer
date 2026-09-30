@@ -12,14 +12,17 @@ python3 sim/run.py --seeds 200 --minutes 120   # heavier run when tuning
 
 Read the printed summary, then check these targets (see GAME_DESIGN.md → Economy targets):
 
+The targets live in `sim/run.py` (`TARGETS`) and are mirrored in GAME_DESIGN.md §9.
+The main ones:
+
 | Metric | Target |
 |---|---|
 | First upgrade bought | < 60 s |
-| Longest gap without an affordable goal (first 60 min) | < 180 s |
-| EV/price of the starter container before upgrades | 0.85–0.97 |
-| EV/price of the starter container after early upgrades | > 1.05 |
-| First legendary (median) | 10–25 min |
-| First prestige available (median) | 60–90 min |
+| Starter (Rusty Box) EV/price, no upgrades | 1.05–1.20 (small player edge, D-011) |
+| Longest gap without a purchase (first 60 min, median player) | < 180 s (known open issue) |
+| First Legendary (median) | 10–25 min |
+| Standard / Premium / Military unlocked | 1.5–7 / 8–25 / 25–55 min |
+| First ★ available / 3 ★ available | 35–60 / 50–80 min |
 
 If a target fails, change `data/*.json` (not code), re-run, and report a before/after table.
 Mention the report file `sim/out/report.html` so Urfan can open the charts.

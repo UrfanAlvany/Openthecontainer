@@ -1,0 +1,119 @@
+{
+  "containers": [
+    {
+      "id": "scrap_pile",
+      "tier": 0,
+      "name": "Dockside Scrap Pile",
+      "blurb": "Free. Someone left it by the fence. It is all rubbish, but it's something.",
+      "price": 0,
+      "cols": 3,
+      "rows": 3,
+      "rustHp": 1,
+      "peekTiles": 0,
+      "rarityWeights": {
+        "junk": 88,
+        "common": 12,
+        "rare": 0,
+        "epic": 0,
+        "legendary": 0
+      },
+      "itemTier": 1,
+      "safetyNetOnly": true
+    },
+    {
+      "id": "rusty",
+      "tier": 1,
+      "name": "Rusty Box",
+      "blurb": "A dented 10-footer from a house clear-out.",
+      "price": 95,
+      "cols": 4,
+      "rows": 3,
+      "rustHp": 2,
+      "peekTiles": 2,
+      "rarityWeights": {
+        "junk": 67,
+        "common": 28,
+        "rare": 5.0,
+        "epic": 0.45,
+        "legendary": 0.06
+      },
+      "itemTier": 1
+    },
+    {
+      "id": "standard",
+      "tier": 2,
+      "name": "Standard 20ft",
+      "blurb": "Unclaimed after the owner stopped paying storage.",
+      "price": 630,
+      "cols": 6,
+      "rows": 5,
+      "rustHp": 3,
+      "peekTiles": 2,
+      "rarityWeights": {
+        "junk": 64.5,
+        "common": 30,
+        "rare": 4.6,
+        "epic": 0.7,
+        "legendary": 0.115
+      },
+      "itemTier": 2
+    },
+    {
+      "id": "premium",
+      "tier": 3,
+      "name": "Premium 40ft",
+      "blurb": "Seized from a luxury importer. Customs paperwork missing.",
+      "price": 3900,
+      "cols": 7,
+      "rows": 5,
+      "rustHp": 5,
+      "peekTiles": 2,
+      "rarityWeights": {
+        "junk": 63,
+        "common": 31,
+        "rare": 5.1,
+        "epic": 0.75,
+        "legendary": 0.12
+      },
+      "itemTier": 3
+    },
+    {
+      "id": "military",
+      "tier": 4,
+      "name": "Sealed Military",
+      "blurb": "Decommissioned base surplus. Stencils say DO NOT OPEN.",
+      "price": 51000,
+      "cols": 8,
+      "rows": 6,
+      "rustHp": 9,
+      "peekTiles": 2,
+      "rarityWeights": {
+        "junk": 62,
+        "common": 32,
+        "rare": 4.9,
+        "epic": 0.73,
+        "legendary": 0.11
+      },
+      "itemTier": 4
+    },
+    {
+      "id": "ship_cargo",
+      "tier": 5,
+      "name": "Legendary Ship Cargo",
+      "blurb": "Recovered from a ship lost at sea in 1962.",
+      "price": 560000,
+      "cols": 9,
+      "rows": 6,
+      "rustHp": 14,
+      "peekTiles": 2,
+      "rarityWeights": {
+        "junk": 62,
+        "common": 32,
+        "rare": 5.3,
+        "epic": 0.75,
+        "legendary": 0.107
+      },
+      "itemTier": 5
+    }
+  ]
+}

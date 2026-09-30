@@ -1,0 +1,267 @@
+{
+  "baseStats": {
+    "scrapePower": 1,
+    "brush": 0,
+    "autoScrape": 0,
+    "appraiser": 0,
+    "xray": 0,
+    "peekBonus": 0,
+    "tierAccess": 1,
+    "sellMult": 1.0,
+    "crew": 0,
+    "crewTier": 1,
+    "autoSellJunk": 0,
+    "luck": 0
+  },
+  "categories": [
+    {
+      "id": "tools",
+      "name": "Tools",
+      "icon": "🛠️"
+    },
+    {
+      "id": "knowledge",
+      "name": "Knowledge",
+      "icon": "🔍"
+    },
+    {
+      "id": "access",
+      "name": "Access",
+      "icon": "🎫"
+    },
+    {
+      "id": "business",
+      "name": "Business",
+      "icon": "💼"
+    },
+    {
+      "id": "luck",
+      "name": "Luck",
+      "icon": "🍀"
+    }
+  ],
+  "upgrades": [
+    {
+      "id": "scraper",
+      "category": "tools",
+      "name": "Better Scraper",
+      "icon": "🪛",
+      "desc": "+1 scrape power. Rust comes off faster.",
+      "stat": "scrapePower",
+      "op": "add",
+      "perLevel": 1,
+      "maxLevel": 20,
+      "cost": {
+        "base": 60,
+        "growth": 2.1
+      }
+    },
+    {
+      "id": "brush",
+      "category": "tools",
+      "name": "Wider Blade",
+      "icon": "🧹",
+      "desc": "Scrape the tiles around your cursor too.",
+      "stat": "brush",
+      "op": "add",
+      "perLevel": 1,
+      "maxLevel": 3,
+      "cost": {
+        "list": [
+          250,
+          4000,
+          60000
+        ]
+      }
+    },
+    {
+      "id": "auto",
+      "category": "tools",
+      "name": "Auto-Scraper",
+      "icon": "🤖",
+      "desc": "+1 automatic scrape per second while you open a container.",
+      "stat": "autoScrape",
+      "op": "add",
+      "perLevel": 1,
+      "maxLevel": 25,
+      "cost": {
+        "base": 1500,
+        "growth": 1.9
+      },
+      "requires": [
+        {
+          "id": "scraper",
+          "level": 2
+        }
+      ]
+    },
+    {
+      "id": "appraiser",
+      "category": "knowledge",
+      "name": "Appraiser's Eye",
+      "icon": "🧐",
+      "desc": "Valuable items glint through the rust. Level 1: Epic+, 2: Rare+, 3: every rarity.",
+      "stat": "appraiser",
+      "op": "add",
+      "perLevel": 1,
+      "maxLevel": 3,
+      "cost": {
+        "list": [
+          150,
+          3000,
+          50000
+        ]
+      }
+    },
+    {
+      "id": "peek",
+      "category": "knowledge",
+      "name": "Door Crack",
+      "icon": "🚪",
+      "desc": "+1 tile visible when you inspect a lot at the auction.",
+      "stat": "peekBonus",
+      "op": "add",
+      "perLevel": 1,
+      "maxLevel": 3,
+      "cost": {
+        "list": [
+          300,
+          5000,
+          80000
+        ]
+      }
+    },
+    {
+      "id": "xray",
+      "category": "knowledge",
+      "name": "X-Ray Scanner",
+      "icon": "🩻",
+      "desc": "Level 1: see item outlines under the rust. Level 2: also at the auction.",
+      "stat": "xray",
+      "op": "add",
+      "perLevel": 1,
+      "maxLevel": 2,
+      "cost": {
+        "list": [
+          8000,
+          200000
+        ]
+      }
+    },
+    {
+      "id": "license",
+      "category": "access",
+      "name": "Auction License",
+      "icon": "🎫",
+      "desc": "Unlocks the next container class at the auction.",
+      "levelNames": [
+        "Standard 20ft",
+        "Premium 40ft",
+        "Sealed Military",
+        "Legendary Ship Cargo"
+      ],
+      "stat": "tierAccess",
+      "op": "add",
+      "perLevel": 1,
+      "maxLevel": 4,
+      "cost": {
+        "list": [
+          400,
+          3500,
+          200000,
+          4000000
+        ]
+      }
+    },
+    {
+      "id": "haggle",
+      "category": "business",
+      "name": "Haggling",
+      "icon": "🤝",
+      "desc": "+10% on everything you sell.",
+      "stat": "sellMult",
+      "op": "add",
+      "perLevel": 0.1,
+      "maxLevel": 25,
+      "cost": {
+        "base": 100,
+        "growth": 1.75
+      }
+    },
+    {
+      "id": "crew",
+      "category": "business",
+      "name": "Hire Crew",
+      "icon": "👷",
+      "desc": "A worker opens containers for you in the yard, even while you play.",
+      "stat": "crew",
+      "op": "add",
+      "perLevel": 1,
+      "maxLevel": 20,
+      "cost": {
+        "base": 5000,
+        "growth": 2.0
+      },
+      "requires": [
+        {
+          "id": "license",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "crew_training",
+      "category": "business",
+      "name": "Crew Training",
+      "icon": "🎓",
+      "desc": "Your crew moves up to the next container class (Standard, then Premium). The big ones are yours to open.",
+      "stat": "crewTier",
+      "op": "add",
+      "perLevel": 1,
+      "maxLevel": 2,
+      "cost": {
+        "list": [
+          60000,
+          900000
+        ]
+      },
+      "requires": [
+        {
+          "id": "crew",
+          "level": 1
+        }
+      ]
+    },
+    {
+      "id": "auto_sell_junk",
+      "category": "business",
+      "name": "Junk Dealer",
+      "icon": "🗑️",
+      "desc": "Junk is sold automatically the moment it's revealed.",
+      "stat": "autoSellJunk",
+      "op": "add",
+      "perLevel": 1,
+      "maxLevel": 1,
+      "cost": {
+        "list": [
+          400
+        ]
+      }
+    },
+    {
+      "id": "lucky_charm",
+      "category": "luck",
+      "name": "Lucky Charm",
+      "icon": "🍀",
+      "desc": "Fewer junk rolls, more Rare, Epic and Legendary.",
+      "stat": "luck",
+      "op": "add",
+      "perLevel": 1,
+      "maxLevel": 20,
+      "cost": {
+        "base": 300,
+        "growth": 2.2
+      }
+    }
+  ]
+}

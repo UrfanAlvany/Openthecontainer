@@ -42,6 +42,7 @@ python3 sim/run.py                 # run economy simulation, writes sim/out/repo
 python3 -m unittest discover sim   # simulator tests
 cd web && python3 -m http.server 8000   # serve the prototype locally
 node web/tests/smoke.mjs           # Playwright smoke test + screenshots (web/tests/out/)
+python3 web/build.py               # export data for the web game + single-file build
 ```
 
 ## Workflow between cloud and laptop
@@ -55,3 +56,11 @@ node web/tests/smoke.mjs           # Playwright smoke test + screenshots (web/te
   next purchase in the first hour).
 - Prototype smoke test passes; screenshots reviewed at 1280×800 and 390×844.
 - `DECISIONS.md` updated if anything was decided.
+
+## Tests (run all before pushing)
+```bash
+python3 -m unittest discover sim   # data sanity + Python/JS parity
+node web/tests/game.test.js        # game logic
+python3 web/build.py               # regenerate web/js/data.js + web/dist/dockside.html
+node web/tests/smoke.mjs           # real browser, desktop + phone screenshots
+```

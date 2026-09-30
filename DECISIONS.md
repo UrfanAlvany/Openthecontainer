@@ -84,3 +84,28 @@ moving; Urfan can overrule at any time), **Superseded**.
   10K+ wishlists before the fest. Main arc 5–7 h, completion 15–20 h.
 - **Why:** Under-$10 games convert better (0.17× vs 0.10× wishlists); October 2026 Next
   Fest registration has closed; pre-fest wishlists are the strongest predictor of results.
+
+### D-011 — The starter class (Rusty Box) gives the player a small edge
+- **Date:** 2026-09-30 · **By:** Claude (from the simulator) · **Status:** Working — Urfan to confirm
+- **What:** The Rusty Box pays back 1.16× its price on average before upgrades. Every
+  bigger class opens below break-even (1.01× → 0.84×), and upgrades push it into profit.
+- **Why:** With the starter at or below break-even, about a quarter of simulated new
+  players went broke within 15 minutes and spent 10+ minutes in the scrap pile. That is a
+  terrible first session. The brief's "EV below price, upgrades push it above" still holds
+  for every class after the first.
+- **Refines:** Urfan's brief (Economy).
+
+### D-012 — Yard crew only works the cheap classes
+- **Date:** 2026-09-30 · **By:** Claude (from the simulator) · **Status:** Working
+- **What:** Hired crew opens Rusty, then at most Standard or Premium containers. Military
+  and Ship Cargo are always opened by the player.
+- **Why:** Crew on top classes made income explode 2,000× in 20 minutes, and it would
+  automate away the best reveals.
+
+### D-013 — Prototype tech: plain HTML/CSS/JS, no build tools, shared seeded RNG
+- **Date:** 2026-09-30 · **By:** Claude · **Status:** Working
+- **What:** Classic scripts (they also work from `file://`), data exported from `data/*.json`
+  by `web/build.py`, and a single-file build for the shareable link. The same mulberry32
+  generator in Python and JavaScript, checked by a parity test.
+- **Why:** Zero setup on Urfan's laptop (double-click `web/index.html`), and simulator
+  results apply to the real game exactly.

@@ -1,0 +1,984 @@
+{
+ "items": [
+  {
+   "id": "soggy_box",
+   "name": "Soggy Cardboard Box",
+   "rarity": "junk",
+   "w": 1,
+   "h": 1,
+   "value": 0.72,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "📦",
+   "flavor": "Smells like 1997."
+  },
+  {
+   "id": "broken_lamp",
+   "name": "Broken Lamp",
+   "rarity": "junk",
+   "w": 1,
+   "h": 1,
+   "value": 1.44,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "💡",
+   "flavor": "Still flickers if you believe."
+  },
+  {
+   "id": "rubber_duck",
+   "name": "Rubber Duck",
+   "rarity": "junk",
+   "w": 1,
+   "h": 1,
+   "value": 2.4,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "🦆",
+   "flavor": "Squeaks. Worth it."
+  },
+  {
+   "id": "vhs_tape",
+   "name": "Unlabelled VHS Tape",
+   "rarity": "junk",
+   "w": 1,
+   "h": 1,
+   "value": 1.92,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "📼",
+   "flavor": "Could be anything. It's a wedding."
+  },
+  {
+   "id": "tangled_cables",
+   "name": "Tangled Cables",
+   "rarity": "junk",
+   "w": 1,
+   "h": 1,
+   "value": 1.2,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "🔌",
+   "flavor": "Every charger ever made."
+  },
+  {
+   "id": "old_tire",
+   "name": "Old Tire",
+   "rarity": "junk",
+   "w": 1,
+   "h": 1,
+   "value": 2.88,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "🛞",
+   "flavor": "Bald as a billiard ball."
+  },
+  {
+   "id": "plastic_chair",
+   "name": "Plastic Garden Chair",
+   "rarity": "junk",
+   "w": 1,
+   "h": 2,
+   "value": 4.8,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "🪑",
+   "flavor": "Structurally optimistic."
+  },
+  {
+   "id": "toaster",
+   "name": "Toaster",
+   "rarity": "common",
+   "w": 1,
+   "h": 1,
+   "value": 12.0,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "🍞",
+   "flavor": "Two slots. One works."
+  },
+  {
+   "id": "kettle",
+   "name": "Kettle",
+   "rarity": "common",
+   "w": 1,
+   "h": 1,
+   "value": 9.6,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "🫖",
+   "flavor": "Limescale edition."
+  },
+  {
+   "id": "vinyl_record",
+   "name": "Vinyl Record",
+   "rarity": "common",
+   "w": 1,
+   "h": 1,
+   "value": 14.4,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "💿",
+   "flavor": "Side B is better."
+  },
+  {
+   "id": "microwave",
+   "name": "Microwave",
+   "rarity": "common",
+   "w": 1,
+   "h": 1,
+   "value": 16.8,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "📟",
+   "flavor": "The light still comes on."
+  },
+  {
+   "id": "guitar",
+   "name": "Acoustic Guitar",
+   "rarity": "common",
+   "w": 1,
+   "h": 2,
+   "value": 28.8,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "🎸",
+   "flavor": "Missing one string. Wonderwall-ready."
+  },
+  {
+   "id": "bicycle",
+   "name": "Bicycle",
+   "rarity": "common",
+   "w": 2,
+   "h": 2,
+   "value": 43.2,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "🚲",
+   "flavor": "Needs air. And a chain."
+  },
+  {
+   "id": "vintage_radio",
+   "name": "Vintage Radio",
+   "rarity": "rare",
+   "w": 1,
+   "h": 1,
+   "value": 35,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "📻",
+   "flavor": "Picks up a station from 1974."
+  },
+  {
+   "id": "game_console",
+   "name": "Retro Game Console",
+   "rarity": "rare",
+   "w": 1,
+   "h": 1,
+   "value": 45,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "🎮",
+   "flavor": "Cartridge still inside."
+  },
+  {
+   "id": "designer_bag",
+   "name": "Designer Handbag",
+   "rarity": "rare",
+   "w": 1,
+   "h": 1,
+   "value": 60,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "👜",
+   "flavor": "The stitching says real."
+  },
+  {
+   "id": "antique_clock",
+   "name": "Antique Clock",
+   "rarity": "rare",
+   "w": 1,
+   "h": 2,
+   "value": 80,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "🕰️",
+   "flavor": "Ticks twice, then thinks about it."
+  },
+  {
+   "id": "signed_baseball",
+   "name": "Signed Baseball",
+   "rarity": "epic",
+   "w": 1,
+   "h": 1,
+   "value": 220,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "⚾",
+   "flavor": "The signature checks out."
+  },
+  {
+   "id": "silver_teaset",
+   "name": "Silver Tea Set",
+   "rarity": "epic",
+   "w": 2,
+   "h": 1,
+   "value": 260,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "🍵",
+   "flavor": "Hallmarked. Grandma knew."
+  },
+  {
+   "id": "gold_pocket_watch",
+   "name": "Gold Pocket Watch",
+   "rarity": "legendary",
+   "w": 1,
+   "h": 1,
+   "value": 1200,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "⌚",
+   "flavor": "Engraved: 'For 40 years of service'."
+  },
+  {
+   "id": "comic_no1",
+   "name": "Comic Book #1",
+   "rarity": "legendary",
+   "w": 1,
+   "h": 1,
+   "value": 1500,
+   "tiers": [
+    1,
+    2
+   ],
+   "icon": "📚",
+   "flavor": "Bagged, boarded, never read."
+  },
+  {
+   "id": "broken_tv",
+   "name": "Broken TV",
+   "rarity": "junk",
+   "w": 1,
+   "h": 1,
+   "value": 4.0,
+   "tiers": [
+    2,
+    3
+   ],
+   "icon": "📺",
+   "flavor": "Makes a noise when you look at it."
+  },
+  {
+   "id": "rusty_toolbox",
+   "name": "Rusty Toolbox",
+   "rarity": "junk",
+   "w": 1,
+   "h": 1,
+   "value": 3.0,
+   "tiers": [
+    2,
+    3
+   ],
+   "icon": "🧰",
+   "flavor": "Contains one (1) screw."
+  },
+  {
+   "id": "mannequin",
+   "name": "Mannequin",
+   "rarity": "junk",
+   "w": 1,
+   "h": 2,
+   "value": 6.0,
+   "tiers": [
+    2,
+    3
+   ],
+   "icon": "🧍",
+   "flavor": "Watching. Always watching."
+  },
+  {
+   "id": "laptop",
+   "name": "Old Laptop",
+   "rarity": "common",
+   "w": 1,
+   "h": 1,
+   "value": 40.0,
+   "tiers": [
+    2,
+    3
+   ],
+   "icon": "💻",
+   "flavor": "Password: password."
+  },
+  {
+   "id": "office_chair",
+   "name": "Office Chair",
+   "rarity": "common",
+   "w": 1,
+   "h": 2,
+   "value": 25.0,
+   "tiers": [
+    2,
+    3
+   ],
+   "icon": "💺",
+   "flavor": "Spins. That's the feature."
+  },
+  {
+   "id": "electric_guitar",
+   "name": "Electric Guitar",
+   "rarity": "common",
+   "w": 1,
+   "h": 2,
+   "value": 60.0,
+   "tiers": [
+    2,
+    3
+   ],
+   "icon": "🎸",
+   "flavor": "Comes with a sticker of a flame."
+  },
+  {
+   "id": "drum_kit",
+   "name": "Drum Kit",
+   "rarity": "common",
+   "w": 2,
+   "h": 2,
+   "value": 90.0,
+   "tiers": [
+    2,
+    3
+   ],
+   "icon": "🥁",
+   "flavor": "Neighbours hated this."
+  },
+  {
+   "id": "espresso_machine",
+   "name": "Espresso Machine",
+   "rarity": "rare",
+   "w": 1,
+   "h": 1,
+   "value": 180.0,
+   "tiers": [
+    2,
+    3
+   ],
+   "icon": "☕",
+   "flavor": "Italian. Dramatic."
+  },
+  {
+   "id": "drone",
+   "name": "Camera Drone",
+   "rarity": "rare",
+   "w": 1,
+   "h": 1,
+   "value": 250.0,
+   "tiers": [
+    2,
+    3
+   ],
+   "icon": "🚁",
+   "flavor": "Last footage: a very confused cat."
+  },
+  {
+   "id": "neon_sign",
+   "name": "Neon Sign",
+   "rarity": "rare",
+   "w": 2,
+   "h": 1,
+   "value": 300.0,
+   "tiers": [
+    2,
+    3
+   ],
+   "icon": "🪧",
+   "flavor": "Says OPEN. Forever."
+  },
+  {
+   "id": "arcade_cabinet",
+   "name": "Arcade Cabinet",
+   "rarity": "epic",
+   "w": 1,
+   "h": 2,
+   "value": 1500.0,
+   "tiers": [
+    2,
+    3
+   ],
+   "icon": "🕹️",
+   "flavor": "High score: AAA, 999,990."
+  },
+  {
+   "id": "vintage_moped",
+   "name": "Vintage Moped",
+   "rarity": "epic",
+   "w": 2,
+   "h": 2,
+   "value": 2000.0,
+   "tiers": [
+    2,
+    3
+   ],
+   "icon": "🛵",
+   "flavor": "Starts on the third kick."
+  },
+  {
+   "id": "first_edition_cards",
+   "name": "First Edition Card",
+   "rarity": "legendary",
+   "w": 1,
+   "h": 1,
+   "value": 9000.0,
+   "tiers": [
+    2,
+    3
+   ],
+   "icon": "🃏",
+   "flavor": "Holo. Shadowless. Gasp."
+  },
+  {
+   "id": "jukebox",
+   "name": "Classic Jukebox",
+   "rarity": "legendary",
+   "w": 2,
+   "h": 2,
+   "value": 12000.0,
+   "tiers": [
+    2,
+    3
+   ],
+   "icon": "🎶",
+   "flavor": "Still plays the good stuff."
+  },
+  {
+   "id": "pallet",
+   "name": "Broken Pallet",
+   "rarity": "junk",
+   "w": 1,
+   "h": 1,
+   "value": 10.5,
+   "tiers": [
+    3,
+    4
+   ],
+   "icon": "🪵",
+   "flavor": "Splinters included."
+  },
+  {
+   "id": "bolt_crate",
+   "name": "Crate of Bolts",
+   "rarity": "junk",
+   "w": 1,
+   "h": 1,
+   "value": 14.0,
+   "tiers": [
+    3,
+    4
+   ],
+   "icon": "🔩",
+   "flavor": "Thousands. All the wrong size."
+  },
+  {
+   "id": "packing_peanuts",
+   "name": "Packing Peanuts",
+   "rarity": "junk",
+   "w": 1,
+   "h": 1,
+   "value": 5.6,
+   "tiers": [
+    3,
+    4
+   ],
+   "icon": "🥜",
+   "flavor": "They get everywhere."
+  },
+  {
+   "id": "telescope",
+   "name": "Telescope",
+   "rarity": "common",
+   "w": 1,
+   "h": 2,
+   "value": 154.0,
+   "tiers": [
+    3,
+    4
+   ],
+   "icon": "🔭",
+   "flavor": "Pointed at the neighbour's house."
+  },
+  {
+   "id": "e_bike",
+   "name": "E-Bike",
+   "rarity": "common",
+   "w": 2,
+   "h": 2,
+   "value": 210.0,
+   "tiers": [
+    3,
+    4
+   ],
+   "icon": "🚴",
+   "flavor": "Battery at 3%."
+  },
+  {
+   "id": "wine_case",
+   "name": "Case of Wine",
+   "rarity": "common",
+   "w": 1,
+   "h": 1,
+   "value": 112.0,
+   "tiers": [
+    3,
+    4
+   ],
+   "icon": "🍷",
+   "flavor": "Vintage: last Tuesday."
+  },
+  {
+   "id": "gold_chain",
+   "name": "Gold Chain",
+   "rarity": "rare",
+   "w": 1,
+   "h": 1,
+   "value": 840.0,
+   "tiers": [
+    3,
+    4
+   ],
+   "icon": "📿",
+   "flavor": "Heavier than it looks."
+  },
+  {
+   "id": "designer_sofa",
+   "name": "Designer Sofa",
+   "rarity": "rare",
+   "w": 2,
+   "h": 2,
+   "value": 1050.0,
+   "tiers": [
+    3,
+    4
+   ],
+   "icon": "🛋️",
+   "flavor": "Italian leather, one cat scratch."
+  },
+  {
+   "id": "rare_whisky",
+   "name": "Rare Whisky",
+   "rarity": "epic",
+   "w": 1,
+   "h": 1,
+   "value": 5600.0,
+   "tiers": [
+    3,
+    4
+   ],
+   "icon": "🥃",
+   "flavor": "Aged 30 years. Opened 0 times."
+  },
+  {
+   "id": "sports_motorbike",
+   "name": "Sports Motorbike",
+   "rarity": "epic",
+   "w": 3,
+   "h": 2,
+   "value": 8400.0,
+   "tiers": [
+    3,
+    4
+   ],
+   "icon": "🏍️",
+   "flavor": "Zero to regret in 3 seconds."
+  },
+  {
+   "id": "diamond_necklace",
+   "name": "Diamond Necklace",
+   "rarity": "legendary",
+   "w": 1,
+   "h": 1,
+   "value": 42000.0,
+   "tiers": [
+    3,
+    4
+   ],
+   "icon": "💎",
+   "flavor": "Certificate included."
+  },
+  {
+   "id": "classic_painting",
+   "name": "Lost Painting",
+   "rarity": "legendary",
+   "w": 2,
+   "h": 2,
+   "value": 63000.0,
+   "tiers": [
+    3,
+    4
+   ],
+   "icon": "🖼️",
+   "flavor": "The museum has been looking for this."
+  },
+  {
+   "id": "empty_ammo_crate",
+   "name": "Empty Ammo Crate",
+   "rarity": "junk",
+   "w": 1,
+   "h": 1,
+   "value": 100,
+   "tiers": [
+    4,
+    5
+   ],
+   "icon": "🗃️",
+   "flavor": "Empty. Thankfully."
+  },
+  {
+   "id": "gas_mask",
+   "name": "Gas Mask",
+   "rarity": "junk",
+   "w": 1,
+   "h": 1,
+   "value": 120,
+   "tiers": [
+    4,
+    5
+   ],
+   "icon": "😷",
+   "flavor": "Smells of rubber and history."
+  },
+  {
+   "id": "camo_netting",
+   "name": "Camo Netting",
+   "rarity": "junk",
+   "w": 2,
+   "h": 1,
+   "value": 180,
+   "tiers": [
+    4,
+    5
+   ],
+   "icon": "🥬",
+   "flavor": "You almost didn't see it."
+  },
+  {
+   "id": "field_radio",
+   "name": "Field Radio",
+   "rarity": "common",
+   "w": 1,
+   "h": 1,
+   "value": 800,
+   "tiers": [
+    4,
+    5
+   ],
+   "icon": "📡",
+   "flavor": "Someone is still reporting in."
+  },
+  {
+   "id": "night_vision",
+   "name": "Night-Vision Goggles",
+   "rarity": "common",
+   "w": 1,
+   "h": 1,
+   "value": 1500,
+   "tiers": [
+    4,
+    5
+   ],
+   "icon": "🥽",
+   "flavor": "Everything is green now."
+  },
+  {
+   "id": "sat_phone",
+   "name": "Satellite Phone",
+   "rarity": "rare",
+   "w": 1,
+   "h": 1,
+   "value": 8000,
+   "tiers": [
+    4,
+    5
+   ],
+   "icon": "☎️",
+   "flavor": "Three missed calls from 'HQ'."
+  },
+  {
+   "id": "officer_sword",
+   "name": "Officer's Sabre",
+   "rarity": "rare",
+   "w": 1,
+   "h": 2,
+   "value": 12000,
+   "tiers": [
+    4,
+    5
+   ],
+   "icon": "🗡️",
+   "flavor": "Ceremonial. Very sharp ceremony."
+  },
+  {
+   "id": "army_jeep",
+   "name": "Army Jeep",
+   "rarity": "epic",
+   "w": 3,
+   "h": 2,
+   "value": 90000,
+   "tiers": [
+    4,
+    5
+   ],
+   "icon": "🚙",
+   "flavor": "Keys in the ignition."
+  },
+  {
+   "id": "medal_case",
+   "name": "Medal Case",
+   "rarity": "epic",
+   "w": 1,
+   "h": 1,
+   "value": 60000,
+   "tiers": [
+    4,
+    5
+   ],
+   "icon": "🎖️",
+   "flavor": "A whole career in one box."
+  },
+  {
+   "id": "gold_bars",
+   "name": "Gold Bars",
+   "rarity": "legendary",
+   "w": 2,
+   "h": 1,
+   "value": 500000,
+   "tiers": [
+    4,
+    5
+   ],
+   "icon": "🥇",
+   "flavor": "Stamped with a bank that no longer exists."
+  },
+  {
+   "id": "prototype_engine",
+   "name": "Classified Prototype",
+   "rarity": "legendary",
+   "w": 2,
+   "h": 2,
+   "value": 700000,
+   "tiers": [
+    4,
+    5
+   ],
+   "icon": "🛸",
+   "flavor": "The label has been redacted."
+  },
+  {
+   "id": "enigma_device",
+   "name": "Cipher Machine",
+   "rarity": "legendary",
+   "w": 1,
+   "h": 1,
+   "value": 450000,
+   "tiers": [
+    4,
+    5
+   ],
+   "icon": "⌨️",
+   "flavor": "Still set to yesterday's code."
+  },
+  {
+   "id": "ship_rope",
+   "name": "Coil of Ship Rope",
+   "rarity": "junk",
+   "w": 1,
+   "h": 1,
+   "value": 900.0,
+   "tiers": [
+    5,
+    5
+   ],
+   "icon": "🪢",
+   "flavor": "Salty."
+  },
+  {
+   "id": "barnacle_crate",
+   "name": "Barnacle Crate",
+   "rarity": "junk",
+   "w": 1,
+   "h": 1,
+   "value": 1350.0,
+   "tiers": [
+    5,
+    5
+   ],
+   "icon": "🐚",
+   "flavor": "The barnacles have moved in."
+  },
+  {
+   "id": "anchor_chain",
+   "name": "Anchor Chain",
+   "rarity": "junk",
+   "w": 2,
+   "h": 1,
+   "value": 2100.0,
+   "tiers": [
+    5,
+    5
+   ],
+   "icon": "⛓️",
+   "flavor": "Very, very heavy."
+  },
+  {
+   "id": "ship_bell",
+   "name": "Ship's Bell",
+   "rarity": "common",
+   "w": 1,
+   "h": 1,
+   "value": 7500.0,
+   "tiers": [
+    5,
+    5
+   ],
+   "icon": "🔔",
+   "flavor": "Rings true after 60 years."
+  },
+  {
+   "id": "porcelain_vase",
+   "name": "Porcelain Vase",
+   "rarity": "common",
+   "w": 1,
+   "h": 2,
+   "value": 13500.0,
+   "tiers": [
+    5,
+    5
+   ],
+   "icon": "🏺",
+   "flavor": "Survived a shipwreck. Don't drop it."
+  },
+  {
+   "id": "pirate_chest",
+   "name": "Sealed Sea Chest",
+   "rarity": "rare",
+   "w": 2,
+   "h": 1,
+   "value": 90000.0,
+   "tiers": [
+    5,
+    5
+   ],
+   "icon": "🧳",
+   "flavor": "Locked. Rattles promisingly."
+  },
+  {
+   "id": "captains_log",
+   "name": "Captain's Logbook",
+   "rarity": "rare",
+   "w": 1,
+   "h": 1,
+   "value": 67500.0,
+   "tiers": [
+    5,
+    5
+   ],
+   "icon": "📔",
+   "flavor": "The last entry is… interesting."
+  },
+  {
+   "id": "vintage_sports_car",
+   "name": "Vintage Sports Car",
+   "rarity": "epic",
+   "w": 4,
+   "h": 2,
+   "value": 1050000.0,
+   "tiers": [
+    5,
+    5
+   ],
+   "icon": "🏎️",
+   "flavor": "Wrapped in oilcloth since 1962."
+  },
+  {
+   "id": "crown_jewel",
+   "name": "Crown Jewel",
+   "rarity": "epic",
+   "w": 1,
+   "h": 1,
+   "value": 750000.0,
+   "tiers": [
+    5,
+    5
+   ],
+   "icon": "👑",
+   "flavor": "Some kingdom wants this back."
+  },
+  {
+   "id": "pharaoh_mask",
+   "name": "Golden Death Mask",
+   "rarity": "legendary",
+   "w": 2,
+   "h": 2,
+   "value": 7500000.0,
+   "tiers": [
+    5,
+    5
+   ],
+   "icon": "🗿",
+   "flavor": "This should be in a museum."
+  },
+  {
+   "id": "meteorite",
+   "name": "Meteorite",
+   "rarity": "legendary",
+   "w": 1,
+   "h": 1,
+   "value": 5250000.0,
+   "tiers": [
+    5,
+    5
+   ],
+   "icon": "☄️",
+   "flavor": "Fell from the sky. Then fell in the sea."
+  }
+ ]
+}
