@@ -205,7 +205,7 @@
   },
   "prestige": {
     "comment": "Total stars = floor(sqrt(lifetimeEarnings / earningsPerStarSquared)). Each star adds sellBonusPerStar to the sell multiplier.",
-    "earningsPerStarSquared": 200000000,
+    "earningsPerStarSquared": 12000000,
     "sellBonusPerStar": 0.5
   },
   "safetyNet": {

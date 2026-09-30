@@ -1,0 +1,52 @@
+{
+  "comment": "Port contracts: optional goals with a fixed cash reward set when the contract is offered (rewardGuideMult x guide price of your best unlocked class, rounded to 2 significant figures). No timers, no penalties.",
+  "active": 2,
+  "templates": [
+    {
+      "id": "rare_hunt",
+      "type": "find_rarity",
+      "rarity": "rare",
+      "n": 3,
+      "rewardGuideMult": 0.25,
+      "text": "Find {n} Rare-or-better items"
+    },
+    {
+      "id": "epic_hunt",
+      "type": "find_rarity",
+      "rarity": "epic",
+      "n": 1,
+      "rewardGuideMult": 0.35,
+      "text": "Find an Epic-or-better item"
+    },
+    {
+      "id": "busy_day",
+      "type": "open_class",
+      "n": 6,
+      "rewardGuideMult": 0.2,
+      "text": "Open {n} {class} containers"
+    },
+    {
+      "id": "big_win",
+      "type": "profit",
+      "profitGuideMult": 0.5,
+      "n": 1,
+      "rewardGuideMult": 0.25,
+      "text": "Make {amount} profit on a single container"
+    },
+    {
+      "id": "mint",
+      "type": "condition",
+      "condition": "mint",
+      "n": 1,
+      "rewardGuideMult": 0.2,
+      "text": "Find a Mint-condition item"
+    },
+    {
+      "id": "curator",
+      "type": "file",
+      "n": 2,
+      "rewardGuideMult": 0.25,
+      "text": "File {n} new items in your collection book"
+    }
+  ]
+}

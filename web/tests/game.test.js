@@ -6,7 +6,7 @@ const Game = require("../js/core/game.js");
 
 const dataDir = path.join(__dirname, "..", "..", "data");
 const raw = {};
-for (const n of ["config", "containers", "items", "upgrades", "collections"]) {
+for (const n of ["config", "containers", "items", "upgrades", "collections", "rivals", "contracts"]) {
   raw[n] = JSON.parse(fs.readFileSync(path.join(dataDir, n + ".json"), "utf8"));
 }
 
@@ -24,6 +24,8 @@ function test(name, fn) { fn(); passed++; console.log("ok -", name); }
 test("buy, scrape, finish: cash change equals the tally's cash line", () => {
   for (let seed = 1; seed < 60; seed++) {
     const g = new Game(raw, { seed });
+    let bonus = 0;
+    g.on((type, p) => { if (type === "contract") bonus += p.contract.reward; });
     const start = g.s.money;
     assert.ok(g.buyLot(0));
     const price = g.s.current.price;
@@ -34,12 +36,14 @@ test("buy, scrape, finish: cash change equals the tally's cash line", () => {
     assert.ok(Math.abs(cur.tally.found - g.foundValue()) < 1e-9);
     assert.ok(Math.abs(cur.tally.profit - (cur.tally.found - price)) < 1e-9);
     g.finishContainer();
-    assert.ok(Math.abs(g.s.money - (start - price + cash)) < 1e-6, "money mismatch at seed " + seed);
+    assert.ok(Math.abs(g.s.money - (start - price + cash + bonus)) < 1e-6, "money mismatch at seed " + seed);
   }
 });
 
 test("buying Haggling mid-container keeps Found equal to what you get", () => {
   const g = new Game(raw, { seed: 3 });
+  let bonus = 0;
+  g.on((type, p) => { if (type === "contract") bonus += p.contract.reward; });
   g.s.levels.auto_sell_junk = 1;          // some items sell during scraping
   g.s.money += 1000;
   const beforeBuy = g.s.money;
@@ -53,7 +57,7 @@ test("buying Haggling mid-container keeps Found equal to what you get", () => {
   cur.itemState.forEach(st => { st.kept = false; });   // sell everything
   const found = g.foundValue();
   g.finishContainer();
-  const received = g.s.money - afterBuy + upgradeCost;
+  const received = g.s.money - afterBuy + upgradeCost - bonus;
   assert.ok(Math.abs(received - found) < 1e-6, `received ${received} vs found ${found}`);
 });
 
@@ -106,6 +110,81 @@ test("save and load round-trip", () => {
   const h = new Game(raw, { seed: 10, storage });
   assert.ok(h.load());
   assert.strictEqual(h.s.money, 12345);
+});
+
+test("auction: bid until won or outbid; money stays consistent; lot class mix is kept", () => {
+  for (let seed = 1; seed < 80; seed++) {
+    const g = new Game(raw, { seed });
+    g.s.money = 1e6;
+    g.buyUpgrade("license");
+    let bonus = 0;
+    g.on((type, p) => { if (type === "contract") bonus += p.contract.reward; });
+    const classes = g.s.lots.map(l => l.containerId).sort().join();
+    const i = g.s.lots.findIndex(l => l.containerId === "standard");
+    assert.ok(g.openBidding(i));
+    const before = g.s.money;
+    let result = null;
+    for (let k = 0; k < 200 && g.s.bidding; k++) {
+      if (g.s.bidding.holder === "you") result = g.rivalTurn();
+      else if (g.biddingInfo().nextBid > 1200) { g.passBidding(); result = "passed"; }
+      else assert.ok(g.playerBid());
+    }
+    assert.strictEqual(g.s.bidding, null);
+    if (result === "won") {
+      assert.ok(g.s.current, "container should be open after winning");
+      assert.ok(Math.abs(before + bonus - g.s.money - g.s.current.price) < 1e-9);
+      assert.ok(g.s.current.price <= 1200 + 1e-9);
+    } else {
+      assert.strictEqual(g.s.money, before);
+    }
+    assert.strictEqual(g.s.lots.map(l => l.containerId).sort().join(), classes);
+  }
+});
+
+test("auction in the game matches the simulator's auctionOutcome", () => {
+  const R = require("../js/core/rules.js");
+  for (let seed = 1; seed < 60; seed++) {
+    const g = new Game(raw, { seed });
+    g.s.money = 1e6;
+    g.buyUpgrade("license");
+    const i = g.s.lots.findIndex(l => l.containerId === "standard");
+    const p = g.lotPreview(g.s.lots[i]);
+    const limit = p.container.price * 1.1;
+    const expected = R.auctionOutcome(p.auction, limit);
+    g.openBidding(i);
+    let won = false;
+    for (let k = 0; k < 200 && g.s.bidding; k++) {
+      if (g.s.bidding.holder === "you") { if (g.rivalTurn() === "won") won = true; }
+      else if (g.biddingInfo().nextBid > limit) g.passBidding();
+      else g.playerBid();
+    }
+    assert.strictEqual(won, expected.won, "seed " + seed);
+    if (won) assert.ok(Math.abs(g.s.current.price - expected.price) < 1e-9, "seed " + seed);
+  }
+});
+
+test("upgrades are blocked while bidding", () => {
+  const g = new Game(raw, { seed: 4 });
+  g.s.money = 1e6;
+  g.buyUpgrade("license");
+  g.openBidding(g.s.lots.findIndex(l => l.containerId === "standard"));
+  assert.strictEqual(g.buyUpgrade("haggle"), false);
+});
+
+test("contracts: always two on offer; completing one pays its fixed reward and refills", () => {
+  const g = new Game(raw, { seed: 11 });
+  assert.strictEqual(g.s.contracts.length, raw.contracts.active);
+  let paid = 0;
+  g.on((type, p) => { if (type === "contract") paid += p.contract.reward; });
+  g.s.money = 1e6;
+  for (let k = 0; k < 40; k++) {
+    if (!g.buyLot(0)) break;
+    scrapeAll(g);
+    g.finishContainer();
+  }
+  assert.ok(paid > 0, "no contract completed in 40 containers");
+  assert.strictEqual(g.s.contracts.length, raw.contracts.active);
+  g.s.contracts.forEach(c => assert.ok(c.progress < c.n));
 });
 
 console.log(`\n${passed} tests passed`);

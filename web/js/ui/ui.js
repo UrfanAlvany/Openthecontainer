@@ -173,6 +173,8 @@
     if (this.stopScrape) this.stopScrape();
     this.stage.innerHTML = "";
     if (this.g.s.current) this.renderYard();
+    else if (this.g.s.bidding) this.renderBidding();
+    else if (this.passResult) this.renderPassResult();
     else this.renderAuction();
   };
 
@@ -194,23 +196,35 @@
     var access = g.stats().tierAccess;
     this.stage.appendChild(h("div", { class: "stage-head" }, [
       h("h2", { text: "Today's lots" }),
-      h("span", { class: "sub", text: "Peek through the door crack, check the odds, place your bid." })
+      h("span", { class: "sub", text: "Rusty boxes sell at the gate. Bigger containers go to auction against the regulars." })
     ]));
     var lots = h("div", { class: "lots" });
     g.s.lots.forEach(function (lot, i) {
       var p = g.lotPreview(lot), c = p.container;
-      var peek = h("div", { class: "peek", style: "grid-template-columns:repeat(" + c.cols + ",1fr)" });
-      var seen = {}; p.peek.forEach(function (cell) { seen[cell] = true; });
-      var xray = g.stats().xray >= 2;
-      for (var k = 0; k < c.cols * c.rows; k++) {
-        var it = p.gen.items[p.gen.cells[k]];
-        if (seen[k]) {
-          peek.appendChild(h("div", { class: "pc seen", style: "--rc:" + self.rarityColor(it.rarity), title: self.rarityName(it.rarity) }, [self.d.itemById[it.id].icon]));
-        } else {
-          peek.appendChild(h("div", { class: "pc" + (xray && (it.w > 1 || it.h > 1) ? " outline" : "") }));
-        }
+      var peek = self.peekGrid(p);
+      var action;
+      if (p.auction) {
+        var canOpen = g.canAfford(p.auction.opening);
+        var faces = p.auction.rivals.map(function (r) { return self.rivalById(r.id).icon; }).join(" ");
+        action = [
+          h("div", { class: "lotmeta" }, [
+            h("span", { text: "Guide " + money(c.price) }),
+            h("span", { text: "Opening " + money(p.auction.opening) }),
+            h("span", { title: p.auction.rivals.length + " rival bidders", text: faces })
+          ]),
+          h("button", { class: "btn wide buy", disabled: canOpen ? null : "disabled", onclick: function () {
+            A.unlock(); A.click(); g.openBidding(i);
+          } }, [canOpen ? "Join the bidding" : "Need " + money(p.auction.opening) + " to bid"])
+        ];
+      } else {
+        var afford = g.canAfford(c.price);
+        action = [
+          h("div", { class: "lotmeta" }, [h("span", { text: "Fixed price at the yard gate" })]),
+          h("button", { class: "btn wide buy", disabled: afford ? null : "disabled", onclick: function () {
+            A.unlock(); if (g.buyLot(i)) A.buy();
+          } }, [afford ? "Buy for " + money(c.price) : "Need " + money(c.price)])
+        ];
       }
-      var afford = g.canAfford(c.price);
       var card = h("article", { class: "lot" }, [
         h("div", { class: "box", style: "--c:" + TIER_COLORS[c.tier] }, [
           h("div", { class: "code", text: containerCode(c.tier, lot.serial) }),
@@ -222,11 +236,7 @@
           h("p", { class: "blurb", text: c.blurb }),
           h("div", { class: "peek-label", text: "Door crack · " + p.peek.length + " tiles visible" }),
           peek
-        ].concat(self.oddsBlock(c)).concat([
-          h("button", { class: "btn wide buy", disabled: afford ? null : "disabled", onclick: function () {
-            A.unlock(); if (g.buyLot(i)) A.buy();
-          } }, [afford ? "Buy for " + money(c.price) : "Need " + money(c.price)])
-        ]))
+        ].concat(self.oddsBlock(c)).concat(action))
       ]);
       lots.appendChild(card);
     });
@@ -242,7 +252,119 @@
       ]));
     }
     var next = this.d.containers.filter(function (c) { return c.tier === access + 1; })[0];
-    if (next) this.stage.appendChild(h("p", { class: "hint", text: "Next class: " + next.name + " — buy an Auction License upgrade to bid on it." }));
+    if (next) this.stage.appendChild(h("p", { class: "hint", text: "Next class: " + next.name + ". Buy an Auction License upgrade to bid on it." }));
+  };
+
+  UI.prototype.rivalById = function (id) {
+    for (var i = 0; i < this.d.rivals.length; i++) if (this.d.rivals[i].id === id) return this.d.rivals[i];
+    return null;
+  };
+
+  /* Door-crack grid. Tiles only you can see (Door Crack upgrade) are marked. */
+  UI.prototype.peekGrid = function (p, big) {
+    var self = this, c = p.container, xray = this.g.stats().xray >= 2;
+    var grid = h("div", { class: "peek" + (big ? " big" : ""), style: "grid-template-columns:repeat(" + c.cols + ",1fr)" });
+    var seen = {};
+    p.peek.forEach(function (cell, k) { seen[cell] = k < p.basePeek ? "all" : "you"; });
+    for (var k = 0; k < c.cols * c.rows; k++) {
+      var it = p.gen.items[p.gen.cells[k]];
+      if (seen[k]) {
+        grid.appendChild(h("div", { class: "pc seen" + (seen[k] === "you" ? " mine" : ""), style: "--rc:" + self.rarityColor(it.rarity),
+          title: self.d.itemById[it.id].name + " · " + self.rarityName(it.rarity) + (seen[k] === "you" ? " (only you can see this)" : "") }, [self.d.itemById[it.id].icon]));
+      } else {
+        grid.appendChild(h("div", { class: "pc" + (xray && (it.w > 1 || it.h > 1) ? " outline" : "") }));
+      }
+    }
+    return grid;
+  };
+
+  // ------------------------------------------------------------------ stage: live auction
+  UI.prototype.renderBidding = function () {
+    var self = this, g = this.g, info = g.biddingInfo(), p = info.preview, c = p.container, b = info.bidding;
+    var extra = p.peek.length - p.basePeek;
+    this.stage.appendChild(h("div", { class: "stage-head" }, [
+      h("h2", { text: "Lot " + containerCode(c.tier, info.lot.serial) }),
+      h("span", { class: "sub", text: c.name + " · guide price " + money(c.price) })
+    ]));
+    var holderName = b.holder === null ? "No bids yet" : b.holder === "you" ? "You hold the bid" : this.rivalById(info.setup.rivals[b.holder].id).name + " holds the bid";
+    this.bidEl = h("div", { class: "bidnow" }, [
+      h("span", { class: "k", text: b.holder === null ? "Opening bid" : "Current bid" }),
+      h("span", { class: "v", text: money(b.holder === null ? info.setup.opening : b.bid) }),
+      h("span", { class: "who" + (b.holder === "you" ? " you" : ""), text: holderName })
+    ]);
+    var rivals = h("div", { class: "rivals" });
+    info.setup.rivals.forEach(function (r, i) {
+      var def = self.rivalById(r.id), mood = g.rivalMood(i);
+      var holding = b.holder === i;
+      rivals.appendChild(h("div", { class: "rival m-" + mood + (holding ? " holding" : "") }, [
+        h("span", { class: "face", text: def.icon }),
+        h("div", { class: "rt" }, [
+          h("b", { text: def.name }),
+          h("span", { class: "tell", text: def.tells[mood] }),
+          h("small", { text: def.blurb })
+        ]),
+        holding ? h("span", { class: "chip", text: "Holding" }) : mood === "out" ? h("span", { class: "chip out", text: "Out" }) : null
+      ]));
+    });
+    var canBid = b.holder !== "you" && g.canAfford(info.nextBid) && !this.biddingBusy;
+    var bidBtn = h("button", { class: "btn wide", id: "bid-btn", disabled: canBid ? null : "disabled", onclick: function () { self.onPlayerBid(); } },
+      [b.holder === "you" ? "Waiting for the room…" : g.canAfford(info.nextBid) ? "Bid " + money(info.nextBid) : "Can't cover " + money(info.nextBid)]);
+    var passBtn = h("button", { class: "btn ghost wide", id: "pass-btn", disabled: b.holder === "you" || this.biddingBusy ? "disabled" : null, onclick: function () {
+      A.click(); var r = g.passBidding(); if (r) { self.passResult = r; self.renderStage(); }
+    } }, [b.holder === null ? "Not for me" : "Walk away"]);
+    var log = h("ul", { class: "bidlog" });
+    b.log.slice(0, 6).forEach(function (e) {
+      log.appendChild(h("li", { class: e.who === "you" ? "you" : "" }, [
+        h("span", { text: e.who === "you" ? "You" : self.rivalById(info.setup.rivals[e.who].id).name }),
+        h("span", { text: money(e.amount) })
+      ]));
+    });
+    var left = h("div", { class: "bidleft" }, [
+      h("div", { class: "peek-label", text: "Door crack · " + p.basePeek + " tiles everyone sees" + (extra > 0 ? " + " + extra + " only you see" : "") }),
+      this.peekGrid(p, true)
+    ].concat(this.oddsBlock(c)));
+    var right = h("div", { class: "bidright" }, [this.bidEl, h("div", { class: "bidbtns" }, [bidBtn, passBtn]), rivals, log]);
+    this.stage.appendChild(h("div", { class: "auction" }, [left, right]));
+  };
+
+  UI.prototype.onPlayerBid = function () {
+    var self = this, g = this.g;
+    A.unlock();
+    if (!g.playerBid()) return;
+    A.gavel();
+    this.biddingBusy = true;
+    this.renderStage();
+    // The room answers after a beat. Outcomes follow the rivals' fixed private limits.
+    setTimeout(function () {
+      var r = g.rivalTurn();
+      self.biddingBusy = false;
+      if (r === "raised") { A.gavel(); self.renderStage(); }
+      // "won" → the game starts the container; the start event redraws the stage.
+    }, 650 + Math.random() * 350);
+  };
+
+  UI.prototype.renderPassResult = function () {
+    var self = this, r = this.passResult, c = this.d.containerById[r.containerId];
+    var who = r.winner < 0 ? null : this.rivalById(r.rivalId);
+    var list = h("div", { class: "missed" });
+    r.gen.items.slice().sort(function (a, b) { return b.value - a.value; }).slice(0, 8).forEach(function (it) {
+      var def = self.d.itemById[it.id];
+      list.appendChild(h("span", { class: "mi", style: "--rc:" + self.rarityColor(it.rarity), title: def.name }, [def.icon]));
+    });
+    var verdict = !who ? "Nobody wanted it. It goes back to the shipping line." :
+      r.inside > r.price * 1.5 ? who.name + " got a bargain. That one hurts." :
+      r.inside < r.price ? "Good call. " + who.name + " overpaid." : "About what it was worth.";
+    this.stage.appendChild(h("div", { class: "passcard" }, [
+      h("h3", { text: who ? "Sold to " + who.name + " " + who.icon + " for " + money(r.price) : "No sale" }),
+      h("div", { class: "rows" }, [
+        h("div", {}, [h("span", { class: "k", text: "They paid" }), h("span", { class: "v", text: money(r.price) })]),
+        h("div", {}, [h("span", { class: "k", text: "What was inside" }), h("span", { class: "v", text: money(r.inside) })])
+      ]),
+      h("p", { class: "verdict", text: verdict }),
+      h("div", { class: "peek-label", text: "Best finds in that container" }),
+      list,
+      h("button", { class: "btn wide", onclick: function () { self.passResult = null; A.click(); self.renderStage(); } }, ["Back to the lots"])
+    ]));
   };
 
   // ------------------------------------------------------------------ stage: the open container
@@ -292,6 +414,8 @@
       this.gridEl.appendChild(xr);
     }
     var frame = h("div", { class: "frame", style: "--c:" + TIER_COLORS[c.tier] + ";margin-top:22px" }, [this.gridEl]);
+    if (this.justStarted && cur.price > 0) this.doorBeat(c);
+    this.justStarted = false;
     this.findsEl = h("div", { class: "finds" });
     var yard = h("div", { class: "yard" }, [head, meter, frame,
       h("p", { class: "hint", text: "Drag across the rust to scrape. Hold still to keep scraping." }), this.findsEl]);
@@ -301,6 +425,26 @@
     this.updateGlints();
     cur.gen.items.forEach(function (it, idx) { if (cur.itemState[idx].revealed) self.addFind(idx, false); });
     if (cur.done && cur.tally) this.showTally(cur.tally, true);
+  };
+
+  /* Doors swing open, a flashlight sweeps the cargo. Tap to skip. Purely presentational:
+   * the contents were decided when the lot was generated. */
+  UI.prototype.doorBeat = function (c) {
+    var self = this, grid = this.gridEl;
+    if (root.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var doors = h("div", { class: "doors", style: "--c:" + TIER_COLORS[c.tier] }, [
+      h("div", { class: "door l" }, [h("span", { class: "bar" }), h("span", { class: "bar" })]),
+      h("div", { class: "door r" }, [h("span", { class: "bar" }), h("span", { class: "bar" })]),
+      h("div", { class: "sweep" })
+    ]);
+    grid.appendChild(doors);
+    if (this.pendingHammer != null) {
+      this.banner("SOLD!", "to you for " + money(this.pendingHammer), "#ffae42");
+      this.pendingHammer = null;
+    }
+    var open = setTimeout(function () { doors.classList.add("open"); A.doors(); }, 350);
+    var gone = setTimeout(function () { doors.remove(); }, 1700);
+    doors.addEventListener("pointerdown", function () { clearTimeout(open); clearTimeout(gone); doors.remove(); });
   };
 
   UI.prototype.decorateItem = function (idx, el) {
@@ -444,7 +588,15 @@
         this.renderTop(); this.renderPanel(); this.renderFooter();
         if (type === "prestige") { A.fanfare(); this.toast("Business sold. +" + p.gain + " reputation ★ — everything sells for more now."); }
         break;
+      case "bidding": case "passed":
+        this.renderStage(); this.renderPanel();
+        break;
+      case "hammer":
+        A.hammer();
+        this.pendingHammer = p.amount;
+        break;
       case "start":
+        this.justStarted = true;
         this.renderStage();
         this.renderTop();
         this.renderPanel();
@@ -484,8 +636,18 @@
         if (p.completed.length) {
           A.fanfare();
           this.toast("Collection complete: " + p.completed.map(function (c) { return c.name + " (" + c.reward.text + ")"; }).join(", "));
-        } else if (p.filed.length) {
-          this.toast("Filed " + p.filed.length + " item" + (p.filed.length > 1 ? "s" : "") + " in your collection book.");
+        } else {
+          // Honest near-miss: a set that is genuinely one item from done.
+          var g = this.g, close = this.d.collections.filter(function (col) {
+            if (g.s.completed.indexOf(col.id) !== -1) return false;
+            return col.items.filter(function (id) { return g.s.collected.indexOf(id) === -1; }).length === 1;
+          })[0];
+          if (close && p.filed.length) {
+            var missing = this.d.itemById[close.items.filter(function (id) { return g.s.collected.indexOf(id) === -1; })[0]];
+            this.toast("One away! " + close.name + " only needs the " + missing.name + " " + missing.icon);
+          } else if (p.filed.length) {
+            this.toast("Filed " + p.filed.length + " item" + (p.filed.length > 1 ? "s" : "") + " in your collection book.");
+          }
         }
         this.renderAll();
         break;
@@ -494,6 +656,14 @@
         this.renderTop(); this.renderPanel();
         if (this.g.s.current) { this.updateGlints(); }
         else this.renderStage();
+        break;
+      case "contracts":
+        this.renderContracts();
+        break;
+      case "contract":
+        A.cash();
+        this.toast("Contract done: " + p.text + " · +" + money(p.contract.reward));
+        this.renderTop(); this.bumpMoney();
         break;
       case "keep":
         if (this.itemEls) this.itemEls.forEach(function (el, i) { self.decorateItem(i, el); });
@@ -573,6 +743,16 @@
     ]);
     var wrap = h("div", { class: "tally " + cls }, [card]);
     this.stage.appendChild(wrap);
+    if (!restoring && !(root.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+      var vals = card.querySelectorAll(".rows .v"), targets = [t.paid, t.found, profit], t0 = performance.now();
+      (function step(now) {
+        var k = Math.min(1, (now - t0) / 700), e = 1 - Math.pow(1 - k, 3);
+        vals[1].textContent = money(targets[1] * e);
+        vals[2].textContent = (targets[2] >= 0 ? "+" : "") + money(targets[1] * e - targets[0]);
+        if (k < 1) requestAnimationFrame(step);
+        else { vals[2].textContent = (profit >= 0 ? "+" : "") + money(profit); }
+      })(t0);
+    }
     if (!restoring && t.paid > 0) {
       if (profit < 0) A.dud();
       else if (ratio >= 1.5) { A.fanfare(); var r = card.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + 40, ["#5bd68e", "#ffae42", "#ffffff"], 50, 300, 1.1, 4, 350); }
@@ -600,6 +780,9 @@
   UI.prototype.renderUpgrades = function () {
     var self = this, g = this.g;
     this.upButtons = [];
+    this.contractsEl = h("div", { class: "contracts" });
+    this.pane.appendChild(this.contractsEl);
+    this.renderContracts();
     this.goalEl = h("div", { class: "goal" });
     this.pane.appendChild(this.goalEl);
     this.updateGoal();
@@ -649,6 +832,19 @@
     this.updateAffordability();
   };
 
+  UI.prototype.renderContracts = function () {
+    var self = this, el = this.contractsEl; if (!el) return;
+    el.innerHTML = "";
+    el.appendChild(h("div", { class: "cat", text: "Port contracts" }));
+    (this.g.s.contracts || []).forEach(function (c) {
+      el.appendChild(h("div", { class: "contract" }, [
+        h("div", { class: "ct" }, [h("span", { text: self.g.contractText(c) }), h("b", { text: "+" + money(c.reward) })]),
+        h("div", { class: "bar" }, [h("i", { style: "width:" + (c.progress / c.n * 100) + "%" })]),
+        h("small", { text: c.progress + " / " + c.n })
+      ]));
+    });
+  };
+
   UI.prototype.updatePrestige = function () {
     var b = this.prestigeBtn; if (!b || this.prestigeArmed) return;
     var g = this.g, gain = g.prestigePreview();
@@ -671,7 +867,7 @@
     var g = this.g;
     (this.upButtons || []).forEach(function (o) {
       var info = g.upgradeInfo(o.u);
-      o.btn.disabled = info.maxed || !info.unlocked || !g.canAfford(info.cost);
+      o.btn.disabled = info.maxed || !info.unlocked || !g.canAfford(info.cost) || !!g.s.bidding;
     });
     this.updateGoal();
     this.updatePrestige();

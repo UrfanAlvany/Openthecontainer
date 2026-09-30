@@ -39,6 +39,9 @@
       categories: raw.upgrades.categories,
       upgrades: raw.upgrades.upgrades,
       collections: raw.collections.collections,
+      auction: raw.rivals.auction,
+      rivals: raw.rivals.rivals,
+      contracts: raw.contracts,
       containerById: {}, itemById: {}, upgradeById: {}, collectionOfItem: {}
     };
     d.containers.forEach(function (c) { d.containerById[c.id] = c; });
@@ -159,12 +162,85 @@
     return stats.crew * Math.max(0, profit) / d.config.crew.secondsPerContainer;
   }
 
+  // ------------------------------------------------------------ auction (mirrors sim/engine.py)
+  function niceRound(x) {
+    if (x <= 0) return 0;
+    var e = String(Math.floor(x)).length - 2;
+    if (e >= 0) { var step = Math.pow(10, e); return roundHalfUp(x / step) * step; }
+    var mult = Math.pow(10, -e);
+    return roundHalfUp(x * mult) / mult;
+  }
+
+  function peekCells(container, seed, n) {
+    var rng = new Mulberry32((seed ^ 0x5BD1E995) >>> 0);
+    var cells = [], out = [];
+    for (var i = 0; i < container.cols * container.rows; i++) cells.push(i);
+    for (var k = 0; k < Math.min(n, container.cols * container.rows); k++) {
+      var j = Math.floor(rng.next() * cells.length);
+      out.push(cells.splice(j, 1)[0]);
+    }
+    return out;
+  }
+
+  function normal(rng) { return (rng.next() + rng.next() + rng.next() - 1.5) * 2.0; }
+
+  function auctionSetup(d, container, gen, seed) {
+    var a = d.auction, guide = container.price, tiles = container.cols * container.rows;
+    var base = peekCells(container, seed, container.peekTiles);
+    var avgTile = expectedValue(d, container.id, 0) / tiles;
+    var seen = 0;
+    for (var i = 0; i < base.length; i++) {
+      var it = gen.items[gen.cells[base[i]]];
+      seen += it.value / (it.w * it.h);
+    }
+    var ratio = base.length ? seen / (avgTile * base.length) : 1.0;
+    var signal = Math.min(a.signalClamp[1], Math.max(a.signalClamp[0], (ratio - 1) * a.signalScale));
+    var rng = new Mulberry32((seed ^ 0x9E3779B9) >>> 0);
+    var pool = d.rivals.filter(function (r) { return r.minTier <= container.tier; });
+    var count = a.minRivals + Math.floor(rng.next() * (a.maxRivals - a.minRivals + 1));
+    var rivals = [];
+    var picks = Math.min(count, pool.length);
+    for (var k = 0; k < picks; k++) {
+      var r = pool.splice(Math.floor(rng.next() * pool.length), 1)[0];
+      var z = normal(rng);
+      var mx = guide * r.mult * (1 + r.signalWeight * signal) * Math.max(0.3, 1 + r.spread * z);
+      rivals.push({ id: r.id, max: mx });
+    }
+    return { opening: niceRound(guide * a.openingRatio), increment: niceRound(guide * a.incrementRatio),
+             signal: signal, rivals: rivals };
+  }
+
+  function nextRaiser(setup, nextBid, last) {
+    var n = setup.rivals.length;
+    for (var k = 1; k <= n; k++) {
+      var i = (last + k) % n;
+      if (setup.rivals[i].max >= nextBid) return i;
+    }
+    return -1;
+  }
+
+  function auctionOutcome(setup, willingness) {
+    var step = 0, bid = setup.opening, last = -1;
+    if (willingness < bid) return { won: false, price: null };
+    for (;;) {
+      var nxt = setup.opening + (step + 1) * setup.increment;
+      var i = nextRaiser(setup, nxt, last);
+      if (i < 0) return { won: true, price: bid };
+      last = i; step += 1; bid = nxt;
+      var mine = setup.opening + (step + 1) * setup.increment;
+      if (mine > willingness) return { won: false, price: bid };
+      step += 1; bid = mine;
+    }
+  }
+
   var api = {
     RARITIES: RARITIES, Mulberry32: Mulberry32, weightedIndex: weightedIndex,
     roundHalfUp: roundHalfUp, indexData: indexData, pool: pool,
     buyableContainers: buyableContainers, rarityWeights: rarityWeights, generate: generate,
     upgradeCost: upgradeCost, requirementsMet: requirementsMet, computeStats: computeStats,
-    prestigeStars: prestigeStars, expectedValue: expectedValue, crewIncomePerSec: crewIncomePerSec
+    prestigeStars: prestigeStars, expectedValue: expectedValue, crewIncomePerSec: crewIncomePerSec,
+    niceRound: niceRound, peekCells: peekCells, auctionSetup: auctionSetup, nextRaiser: nextRaiser,
+    auctionOutcome: auctionOutcome
   };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else { root.DS = root.DS || {}; root.DS.rules = api; }

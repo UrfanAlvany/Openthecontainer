@@ -1,0 +1,102 @@
+{
+  "auction": {
+    "comment": "Opening bid and increment are fractions of the guide price, rounded to 2 significant figures. Rivals see the container's base door-crack tiles (not the player's extra Door Crack tiles). signal = clamp((value per peeked tile / average value per tile - 1) * signalScale). Rival max = guide * mult * (1 + signalWeight * signal) * max(0.3, 1 + spread * z), z ~ N(0,1). simSecondsPerLot / simOverbid: simulator only — time spent bidding on one lot, and how far above expected value the simulated player will bid.",
+    "openingRatio": 0.4,
+    "incrementRatio": 0.08,
+    "minRivals": 1,
+    "maxRivals": 3,
+    "signalScale": 0.12,
+    "signalClamp": [
+      -0.3,
+      0.6
+    ],
+    "tells": {
+      "confident": 0.3,
+      "nervous": 0.1
+    },
+    "simSecondsPerLot": 4,
+    "simOverbid": 1.05
+  },
+  "rivals": [
+    {
+      "id": "tony",
+      "name": "Big Tony",
+      "icon": "🦍",
+      "minTier": 1,
+      "blurb": "Bids with his heart. His heart is expensive.",
+      "mult": 1.0,
+      "spread": 0.22,
+      "signalWeight": 0.5,
+      "tells": {
+        "confident": "cracks his knuckles",
+        "neutral": "chews his toothpick",
+        "nervous": "is sweating through his shirt",
+        "out": "storms off"
+      }
+    },
+    {
+      "id": "okafor",
+      "name": "Mrs. Okafor",
+      "icon": "🧐",
+      "minTier": 1,
+      "blurb": "Thirty years appraising. Never overpays. Reads the door crack like a book.",
+      "mult": 0.86,
+      "spread": 0.06,
+      "signalWeight": 1.6,
+      "tells": {
+        "confident": "writes a big number in her notebook",
+        "neutral": "adjusts her glasses",
+        "nervous": "taps her pen, frowning",
+        "out": "closes her notebook"
+      }
+    },
+    {
+      "id": "dex",
+      "name": "Dex",
+      "icon": "🧢",
+      "minTier": 1,
+      "blurb": "Flips everything online. Always short on cash.",
+      "mult": 0.7,
+      "spread": 0.3,
+      "signalWeight": 0.8,
+      "tells": {
+        "confident": "is already filming for TikTok",
+        "neutral": "checks his banking app",
+        "nervous": "whispers 'come on, come on'",
+        "out": "puts his phone away"
+      }
+    },
+    {
+      "id": "lou",
+      "name": "Harbourmaster Lou",
+      "icon": "⚓",
+      "minTier": 3,
+      "blurb": "Only shows up for the big boxes. Deep pockets, patient.",
+      "mult": 1.08,
+      "spread": 0.1,
+      "signalWeight": 0.6,
+      "tells": {
+        "confident": "doesn't even look up",
+        "neutral": "sips his coffee",
+        "nervous": "puts his coffee down",
+        "out": "tips his cap and leaves"
+      }
+    },
+    {
+      "id": "vega",
+      "name": "The Vega Sisters",
+      "icon": "👯",
+      "minTier": 2,
+      "blurb": "Antique dealers. They get excited about anything old.",
+      "mult": 0.92,
+      "spread": 0.15,
+      "signalWeight": 1.1,
+      "tells": {
+        "confident": "exchange a knowing look",
+        "neutral": "whisper to each other",
+        "nervous": "argue in whispers",
+        "out": "shake their heads in unison"
+      }
+    }
+  ]
+}

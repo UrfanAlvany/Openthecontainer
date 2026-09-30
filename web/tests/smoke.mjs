@@ -96,6 +96,39 @@ for (const vp of [{ name: "desktop", width: 1280, height: 800 }, { name: "phone"
   if (levels < 1) errors.push(`[${vp.name}] upgrade purchase did not register`);
   await page.screenshot({ path: path.join(outDir, `${vp.name}-4-after-upgrade.png`), fullPage: true });
 
+  // Auction: unlock Standard, join the bidding, bid until the lot is ours or we're outbid.
+  await page.evaluate(() => { const g = window.dockside.game; g.s.money += 20000; g.buyUpgrade("license"); });
+  await page.waitForTimeout(200);
+  await page.locator(".lot .buy:not([disabled])", { hasText: "Join the bidding" }).first().click();
+  await page.waitForSelector(".auction");
+  await page.screenshot({ path: path.join(outDir, `${vp.name}-5-auction.png`), fullPage: true });
+  for (let i = 0; i < 40; i++) {
+    if (await page.locator(".grid").count()) break;
+    const bid = page.locator("#bid-btn:not([disabled])");
+    if (await bid.count()) { await bid.click(); await page.waitForTimeout(1100); continue; }
+    const pass = page.locator("#pass-btn:not([disabled])");
+    if (await pass.count() && !(await page.locator("#bid-btn:not([disabled])").count())) { await pass.click(); break; }
+    await page.waitForTimeout(300);
+  }
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: path.join(outDir, `${vp.name}-6-after-auction.png`), fullPage: true });
+  const state = await page.evaluate(() => ({ money: window.dockside.game.s.money, cur: !!window.dockside.game.s.current }));
+  if (state.money < 0) errors.push(`[${vp.name}] money negative after auction`);
+  if (state.cur) {
+    await scrapeAll(page);
+    await page.waitForSelector(".tally .card", { timeout: 5000 });
+    await page.click("#tally-continue");
+  } else if (await page.locator(".passcard").count()) {
+    await page.locator(".passcard .btn").click();
+  }
+  // Walk away from a lot without bidding and check the "what was inside" card.
+  await page.waitForSelector(".lot");
+  await page.locator(".lot .buy:not([disabled])", { hasText: "Join the bidding" }).first().click();
+  await page.waitForSelector("#pass-btn");
+  await page.click("#pass-btn");
+  await page.waitForSelector(".passcard");
+  await page.screenshot({ path: path.join(outDir, `${vp.name}-7-walked-away.png`), fullPage: true });
+
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
   if (overflow) errors.push(`[${vp.name}] page scrolls horizontally`);
   await ctx.close();

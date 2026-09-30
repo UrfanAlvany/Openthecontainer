@@ -80,6 +80,13 @@
     cash: function () { tone(1568, 0, 0.08, "square", 0.05); tone(2093, 0.07, 0.18, "square", 0.05); noise(0, 0.12, 5000, 2, 0.05); },
     dud: function () { tone(330, 0, 0.25, "sawtooth", 0.07, 220); tone(247, 0.22, 0.45, "sawtooth", 0.07, 150); },
     fanfare: function () { [392, 523, 659, 784].forEach(function (f, i) { tone(f, i * 0.1, 0.35, "triangle", 0.12); }); },
+    gavel: function () { noise(0, 0.06, 900, 1.2, 0.25); tone(210, 0, 0.08, "triangle", 0.12, 150); },
+    hammer: function () {
+      noise(0, 0.09, 700, 1, 0.35); tone(160, 0, 0.14, "triangle", 0.2, 100);
+      noise(0.28, 0.09, 700, 1, 0.35); tone(160, 0.28, 0.14, "triangle", 0.2, 100);
+      noise(0.62, 0.14, 500, 0.8, 0.5); tone(120, 0.62, 0.3, "triangle", 0.25, 70);
+    },
+    doors: function () { noise(0, 0.5, 260, 0.7, 0.18); tone(70, 0, 0.6, "sawtooth", 0.05, 55); },
     click: function () { tone(1200, 0, 0.03, "square", 0.03); }
   };
   root.DS = root.DS || {};

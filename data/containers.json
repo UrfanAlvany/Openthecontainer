@@ -18,7 +18,8 @@
         "legendary": 0
       },
       "itemTier": 1,
-      "safetyNetOnly": true
+      "safetyNetOnly": true,
+      "sale": "fixed"
     },
     {
       "id": "rusty",
@@ -37,14 +38,15 @@
         "epic": 0.45,
         "legendary": 0.06
       },
-      "itemTier": 1
+      "itemTier": 1,
+      "sale": "fixed"
     },
     {
       "id": "standard",
       "tier": 2,
       "name": "Standard 20ft",
       "blurb": "Unclaimed after the owner stopped paying storage.",
-      "price": 630,
+      "price": 800,
       "cols": 6,
       "rows": 5,
       "rustHp": 3,
@@ -56,14 +58,15 @@
         "epic": 0.7,
         "legendary": 0.115
       },
-      "itemTier": 2
+      "itemTier": 2,
+      "sale": "auction"
     },
     {
       "id": "premium",
       "tier": 3,
       "name": "Premium 40ft",
       "blurb": "Seized from a luxury importer. Customs paperwork missing.",
-      "price": 3900,
+      "price": 6000,
       "cols": 7,
       "rows": 5,
       "rustHp": 5,
@@ -75,7 +78,8 @@
         "epic": 0.75,
         "legendary": 0.12
       },
-      "itemTier": 3
+      "itemTier": 3,
+      "sale": "auction"
     },
     {
       "id": "military",
@@ -94,7 +98,8 @@
         "epic": 0.73,
         "legendary": 0.11
       },
-      "itemTier": 4
+      "itemTier": 4,
+      "sale": "auction"
     },
     {
       "id": "ship_cargo",
@@ -113,7 +118,8 @@
         "epic": 0.75,
         "legendary": 0.107
       },
-      "itemTier": 5
+      "itemTier": 5,
+      "sale": "auction"
     }
   ]
 }

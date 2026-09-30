@@ -246,3 +246,71 @@ button { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* ---------------------------------------------------------------- auction */
+.lotmeta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-family: var(--font-num); font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.peek.big { max-width: 420px; }
+.peek.big .pc { font-size: clamp(14px, 3.4vw, 24px); }
+.peek .pc.mine { outline: 2px dashed var(--sodium); outline-offset: -2px; }
+.auction { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 700px) { .auction { grid-template-columns: minmax(0, 1fr); } }
+.bidleft, .bidright { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.bidnow { background: var(--steel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; }
+.bidnow .k { font-family: var(--font-num); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.bidnow .v { font-family: var(--font-num); font-weight: 700; font-size: 40px; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.bidnow .who { font-size: 14px; color: var(--muted); }
+.bidnow .who.you { color: var(--sodium); font-weight: 600; }
+.bidbtns { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; }
+.rivals { display: flex; flex-direction: column; gap: 6px; }
+.rival { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 10px; align-items: center; background: var(--steel); border-radius: 6px; padding: 8px 10px; border-left: 3px solid var(--line); }
+.rival .face { font-size: 26px; text-align: center; }
+.rival .rt { display: flex; flex-direction: column; min-width: 0; }
+.rival .rt b { font-size: 14px; }
+.rival .tell { font-size: 13.5px; font-style: italic; }
+.rival small { color: var(--muted); font-size: 12px; }
+.rival.m-confident { border-left-color: var(--loss); }
+.rival.m-neutral { border-left-color: var(--sodium); }
+.rival.m-nervous { border-left-color: var(--gain); }
+.rival.m-out { opacity: .5; }
+.rival.holding { box-shadow: inset 0 0 0 1px var(--sodium); }
+.chip { font-family: var(--font-num); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; background: var(--sodium); color: var(--sodium-ink); border-radius: 3px; padding: 1px 6px; }
+.chip.out { background: var(--steel-hi); color: var(--muted); }
+.bidlog { list-style: none; margin: 0; padding: 0; font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 3px; font-variant-numeric: tabular-nums; }
+.bidlog li { display: flex; justify-content: space-between; }
+.bidlog li.you { color: var(--sodium); }
+.passcard { max-width: 520px; margin: 0 auto; background: var(--steel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.passcard h3 { margin: 0; font-family: var(--font-display); font-weight: 800; letter-spacing: .04em; font-size: 22px; text-wrap: balance; }
+.passcard .rows { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.passcard .rows div { background: var(--night); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; }
+.passcard .rows .k { font-family: var(--font-num); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.passcard .rows .v { font-family: var(--font-num); font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.passcard .verdict { margin: 0; font-size: 15px; }
+.missed { display: flex; flex-wrap: wrap; gap: 6px; }
+.missed .mi { width: 40px; height: 40px; display: grid; place-items: center; font-size: 22px; border-radius: 6px; background: var(--night); box-shadow: inset 0 0 0 2px var(--rc); }
+
+/* ---------------------------------------------------------------- door beat */
+.doors { position: absolute; inset: 0; z-index: 8; perspective: 900px; cursor: pointer; }
+.door { position: absolute; top: 0; bottom: 0; width: 50%;
+  background: repeating-linear-gradient(90deg, rgba(0,0,0,.25) 0 3px, rgba(255,255,255,.05) 3px 6px, transparent 6px 14px),
+              linear-gradient(180deg, color-mix(in srgb, var(--c) 100%, white 6%), color-mix(in srgb, var(--c) 100%, black 35%));
+  transition: transform .9s cubic-bezier(.5, 0, .2, 1); box-shadow: inset 0 0 0 2px rgba(0,0,0,.4); }
+.door.l { left: 0; transform-origin: left center; }
+.door.r { right: 0; transform-origin: right center; }
+.door .bar { position: absolute; top: 8%; bottom: 8%; width: 5px; border-radius: 3px; background: linear-gradient(180deg, #c9ced2, #7c858c); }
+.door.l .bar:first-child { right: 22%; } .door.l .bar:last-child { right: 10%; }
+.door.r .bar:first-child { left: 22%; } .door.r .bar:last-child { left: 10%; }
+.doors.open .door.l { transform: rotateY(-105deg); }
+.doors.open .door.r { transform: rotateY(105deg); }
+.sweep { position: absolute; inset: 0; opacity: 0; background: radial-gradient(circle at var(--x, 0%) 50%, rgba(255, 236, 190, .35), transparent 32%); }
+.doors.open .sweep { animation: sweep 1.1s ease-in-out .3s forwards; }
+@keyframes sweep { 0% { opacity: 1; --x: 0%; } 100% { opacity: 0; --x: 100%; } }
+@property --x { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
+
+/* ---------------------------------------------------------------- contracts */
+.contracts { display: flex; flex-direction: column; gap: 8px; }
+.contracts .cat { margin-top: 0; }
+.contract { background: var(--night); border-radius: 6px; padding: 8px 10px; display: flex; flex-direction: column; gap: 5px; font-size: 13.5px; }
+.contract .ct { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.contract .ct b { font-family: var(--font-num); color: var(--gain); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.contract small { color: var(--muted); font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.contract .bar i { background: var(--gain); }

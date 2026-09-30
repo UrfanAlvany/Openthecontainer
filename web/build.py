@@ -14,7 +14,7 @@ import re
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 DATA = os.path.join(ROOT, "data")
-FILES = ["config", "containers", "items", "upgrades", "collections"]
+FILES = ["config", "containers", "items", "upgrades", "collections", "rivals", "contracts"]
 SCRIPTS = ["js/data.js", "js/core/rules.js", "js/core/game.js", "js/ui/audio.js", "js/ui/ui.js", "js/main.js"]
 
 

@@ -8,7 +8,8 @@ import sys
 import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from engine import Data, Mulberry32, expected_value, generate, upgrade_cost  # noqa: E402
+from engine import (Data, Mulberry32, auction_outcome, auction_setup, expected_value, generate,  # noqa: E402
+                    nice_round, peek_cells, upgrade_cost)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -37,6 +38,17 @@ class ParityTest(unittest.TestCase):
         for c in self.d.containers:
             self.assertEqual([expected_value(self.d, c["id"], 0), expected_value(self.d, c["id"], 5)],
                              self.js["ev"][c["id"]], c["id"])
+
+    def test_auctions_match(self):
+        for a in self.js["auctions"]:
+            c = self.d.container_by_id[a["c"]]
+            g = generate(self.d, c, 0, a["seed"])
+            setup = auction_setup(self.d, c, g, a["seed"])
+            self.assertEqual(peek_cells(c, a["seed"], 5), a["peek"])
+            self.assertEqual(nice_round(c["price"] * 0.08), a["nice"])
+            self.assertEqual(setup, a["setup"], a)
+            py = [auction_outcome(setup, c["price"] * w) for w in (0.5, 0.9, 1.0, 1.2, 2.0)]
+            self.assertEqual([{"won": w, "price": p} for w, p in py], a["outcomes"])
 
     def test_costs_match(self):
         for u in self.d.upgrades:

@@ -63,6 +63,10 @@ class Data:
         self.base_stats = up["baseStats"]
         self.upgrades = up["upgrades"]
         self.collections = load("collections.json")["collections"]
+        rv = load("rivals.json")
+        self.auction = rv["auction"]
+        self.rivals = rv["rivals"]
+        self.contracts = load("contracts.json")
         self.container_by_id = {c["id"]: c for c in self.containers}
         self.item_by_id = {i["id"]: i for i in self.items}
         self.upgrade_by_id = {u["id"]: u for u in self.upgrades}
@@ -199,3 +203,93 @@ def crew_income_per_sec(data, stats):
     c = next(c for c in data.buyable_containers() if c["tier"] == tier)
     profit = expected_value(data, c["id"], stats["luck"]) * stats["sellTotal"] - c["price"]
     return stats["crew"] * max(0.0, profit) / data.config["crew"]["secondsPerContainer"]
+
+
+# ---------------------------------------------------------------- auction
+MASK = 0xFFFFFFFF
+
+
+def nice_round(x):
+    """Round to 2 significant figures (same as JS niceRound)."""
+    if x <= 0:
+        return 0
+    e = len(str(int(math.floor(x)))) - 2
+    if e >= 0:
+        step = 10 ** e
+        return round_half_up(x / step) * step
+    mult = 10 ** (-e)
+    return round_half_up(x * mult) / mult
+
+
+def peek_cells(container, seed, n):
+    """Door-crack cells for a lot. The first container['peekTiles'] are what everyone sees;
+    Door Crack upgrades reveal the next ones in the same sequence."""
+    rng = Mulberry32((seed ^ 0x5BD1E995) & MASK)
+    cells = list(range(container["cols"] * container["rows"]))
+    out = []
+    for _ in range(min(n, len(cells))):
+        j = int(rng.next() * len(cells))
+        out.append(cells.pop(j))
+    return out
+
+
+def _normal(rng):
+    return (rng.next() + rng.next() + rng.next() - 1.5) * 2.0
+
+
+def auction_setup(data, container, gen, seed):
+    """Opening bid, increment and each rival's private maximum for one lot."""
+    a = data.auction
+    guide = container["price"]
+    tiles = container["cols"] * container["rows"]
+    base = peek_cells(container, seed, container["peekTiles"])
+    avg_tile = expected_value(data, container["id"], 0) / tiles
+    seen = 0.0
+    for cell in base:
+        it = gen["items"][gen["cells"][cell]]
+        seen += it["value"] / (it["w"] * it["h"])
+    ratio = seen / (avg_tile * len(base)) if base else 1.0
+    lo, hi = a["signalClamp"]
+    signal = min(hi, max(lo, (ratio - 1) * a["signalScale"]))
+    rng = Mulberry32((seed ^ 0x9E3779B9) & MASK)
+    pool = [r for r in data.rivals if r["minTier"] <= container["tier"]]
+    count = a["minRivals"] + int(rng.next() * (a["maxRivals"] - a["minRivals"] + 1))
+    rivals = []
+    for _ in range(min(count, len(pool))):
+        r = pool.pop(int(rng.next() * len(pool)))
+        z = _normal(rng)
+        mx = guide * r["mult"] * (1 + r["signalWeight"] * signal) * max(0.3, 1 + r["spread"] * z)
+        rivals.append({"id": r["id"], "max": mx})
+    return {"opening": nice_round(guide * a["openingRatio"]),
+            "increment": nice_round(guide * a["incrementRatio"]),
+            "signal": signal, "rivals": rivals}
+
+
+def next_raiser(setup, next_bid, last):
+    """Index of the rival who raises to next_bid, rotating after `last`; -1 if nobody will."""
+    n = len(setup["rivals"])
+    for k in range(1, n + 1):
+        i = (last + k) % n
+        if setup["rivals"][i]["max"] >= next_bid:
+            return i
+    return -1
+
+
+def auction_outcome(setup, willingness):
+    """Play a lot for a player who bids one increment at a time up to `willingness`.
+    Returns (won, price)."""
+    step = 0
+    bid = setup["opening"]
+    if willingness < bid:
+        return False, None
+    last = -1
+    while True:
+        nxt = setup["opening"] + (step + 1) * setup["increment"]
+        i = next_raiser(setup, nxt, last)
+        if i < 0:
+            return True, bid
+        last, step, bid = i, step + 1, nxt
+        mine = setup["opening"] + (step + 1) * setup["increment"]
+        if mine > willingness:
+            return False, bid
+        step, bid = step + 1, mine

@@ -274,7 +274,10 @@ def main(argv=None):
     w = max(len(c[0]) for c in checks)
     for name, v, want, ok in checks:
         print(f"{'PASS' if ok else 'FAIL'}  {name:<{w}}  {v:>10}   target {want}")
-    print(f"\nLegendary found by {m['share_legendary']:.0%} of players; "
+    won = sum(r.auctions_won for r in runs) / max(1, sum(r.auctions for r in runs))
+    ratios = [x for r in runs for x in r.paid_ratio]
+    print(f"\nAuctions won: {won:.0%}; average price paid: {statistics.mean(ratios):.2f}× guide.")
+    print(f"Legendary found by {m['share_legendary']:.0%} of players; "
           f"prestige available for {m['prestige_share']:.0%}; "
           f"license 4 reached by {m['license_4_share']:.0%}.")
     print(f"Report: {os.path.relpath(path)}")

@@ -27,10 +27,13 @@
       rngState: seed >>> 0,
       lots: [],
       current: null,
+      bidding: null,
+      contracts: [],
       history: [],           // last few tallies
       stats: { opened: 0, best: null, found: { junk: 0, common: 0, rare: 0, epic: 0, legendary: 0 } }
     };
     this.refreshLots();
+    this.fillContracts();
   };
 
   Game.prototype.on = function (fn) { this.listeners.push(fn); };
@@ -71,55 +74,137 @@
     var c = this.d.containerById[lot.containerId];
     var st = this.stats();
     var g = R.generate(this.d, c, st.luck, lot.seed);
-    var peekN = c.peekTiles + st.peekBonus;
-    var rng = new R.Mulberry32(lot.seed ^ 0x5bd1e995);
-    var cells = [];
-    for (var i = 0; i < c.cols * c.rows; i++) cells.push(i);
-    var peek = [];
-    for (var k = 0; k < peekN && cells.length; k++) {
-      var j = Math.floor(rng.next() * cells.length);
-      peek.push(cells.splice(j, 1)[0]);
-    }
-    return { container: c, gen: g, peek: peek };
+    var peek = R.peekCells(c, lot.seed, c.peekTiles + st.peekBonus);
+    var auction = c.sale === "auction" ? R.auctionSetup(this.d, c, g, lot.seed) : null;
+    return { container: c, gen: g, peek: peek, basePeek: c.peekTiles, auction: auction };
   };
 
   Game.prototype.canAfford = function (amount) { return this.s.money >= amount; };
 
   Game.prototype.safetyNetAvailable = function () {
     var cheapest = Math.min.apply(null, this.availableContainers().map(function (c) { return c.price; }));
-    return !this.s.current && this.s.money < cheapest;
+    return !this.s.current && !this.s.bidding && this.s.money < cheapest;
   };
 
+  /* A sold lot is replaced in place by a fresh lot of the same class, so the mix of
+   * classes on offer stays the same. */
+  Game.prototype.replaceLot = function (index) {
+    var old = this.s.lots[index];
+    this.s.lots[index] = { containerId: old.containerId, seed: this.nextSeed(), serial: 100000 + (this.nextSeed() % 900000) };
+    this.emit("lots");
+  };
+
+  /* Fixed-price lots (the yard gate). Auction lots go through openBidding. */
   Game.prototype.buyLot = function (index) {
-    if (this.s.current) return false;
+    if (this.s.current || this.s.bidding) return false;
     var lot = this.s.lots[index];
     var p = this.lotPreview(lot);
-    if (!this.canAfford(p.container.price)) return false;
+    if (p.auction || !this.canAfford(p.container.price)) return false;
     this.s.money -= p.container.price;
-    this.startContainer(p.container, p.gen, p.peek, lot.serial);
+    this.startContainer(p.container, p.gen, p.peek, lot.serial, p.container.price);
+    this.replaceLot(index);
     this.save();
-    this.s.lots.splice(index, 1);
-    var avail = this.availableContainers().slice().reverse();
-    this.s.lots.push({ containerId: avail[Math.min(this.s.lots.length, avail.length - 1)].id,
-                       seed: this.nextSeed(), serial: 100000 + (this.nextSeed() % 900000) });
-    this.emit("lots");
     return true;
+  };
+
+  // ------------------------------------------------------------ live auction
+  /* s.bidding: { lot, step, bid, holder: "you" | rival index | null, last, log } */
+  Game.prototype.openBidding = function (index) {
+    if (this.s.current || this.s.bidding) return false;
+    var p = this.lotPreview(this.s.lots[index]);
+    if (!p.auction) return false;
+    this.s.bidding = { lot: index, step: -1, bid: p.auction.opening, holder: null, last: -1, log: [] };
+    this.emit("bidding");
+    return true;
+  };
+
+  Game.prototype.biddingInfo = function () {
+    var b = this.s.bidding; if (!b) return null;
+    var lot = this.s.lots[b.lot], p = this.lotPreview(lot), a = p.auction;
+    var nextBid = b.step < 0 ? a.opening : a.opening + (b.step + 1) * a.increment;
+    return { lot: lot, preview: p, setup: a, nextBid: nextBid, bidding: b };
+  };
+
+  /* Honest tells: coarse headroom between a rival's private maximum and the next bid. */
+  Game.prototype.rivalMood = function (rivalIndex) {
+    var info = this.biddingInfo(), r = info.setup.rivals[rivalIndex];
+    var next = info.bidding.step < 0 ? info.setup.opening : info.nextBid;
+    if (r.max < next) return "out";
+    var head = (r.max - next) / info.preview.container.price, t = this.d.auction.tells;
+    return head > t.confident ? "confident" : head < t.nervous ? "nervous" : "neutral";
+  };
+
+  Game.prototype.playerBid = function () {
+    var info = this.biddingInfo(); if (!info) return false;
+    var b = info.bidding;
+    if (b.holder === "you" || !this.canAfford(info.nextBid)) return false;
+    b.step += 1; b.bid = info.nextBid; b.holder = "you";
+    b.log.unshift({ who: "you", amount: b.bid });
+    this.emit("bid", { who: "you", amount: b.bid });
+    return true;
+  };
+
+  /* Called by the UI after a short pause. Returns "raised", "won" or null. */
+  Game.prototype.rivalTurn = function () {
+    var info = this.biddingInfo(); if (!info || info.bidding.holder !== "you") return null;
+    var b = info.bidding, a = info.setup;
+    var nxt = a.opening + (b.step + 1) * a.increment;
+    var i = R.nextRaiser(a, nxt, b.last);
+    if (i < 0) { this.winBidding(); return "won"; }
+    b.step += 1; b.bid = nxt; b.holder = i; b.last = i;
+    b.log.unshift({ who: i, amount: nxt });
+    this.emit("bid", { who: i, amount: nxt });
+    return "raised";
+  };
+
+  Game.prototype.winBidding = function () {
+    var info = this.biddingInfo(), b = info.bidding, p = info.preview;
+    this.s.money -= b.bid;
+    this.s.bidding = null;
+    this.emit("hammer", { toYou: true, amount: b.bid });
+    this.startContainer(p.container, p.gen, p.peek, info.lot.serial, b.bid);
+    this.replaceLot(b.lot);
+    this.save();
+  };
+
+  /* Walk away: the lot goes to the best rival, and you get to see what was inside. */
+  Game.prototype.passBidding = function () {
+    var info = this.biddingInfo(); if (!info || info.bidding.holder === "you") return null;
+    var b = info.bidding, a = info.setup, p = info.preview;
+    var winner = -1, price = b.bid;
+    if (b.holder === null) {
+      var order = a.rivals.map(function (r, i) { return i; }).sort(function (x, y) { return a.rivals[y].max - a.rivals[x].max; });
+      if (a.rivals[order[0]].max >= a.opening) {
+        winner = order[0];
+        var second = order.length > 1 ? a.rivals[order[1]].max : 0, step = 0;
+        while (a.opening + (step + 1) * a.increment <= second) step++;
+        price = a.opening + step * a.increment;
+      }
+    } else winner = b.holder;
+    var inside = p.gen.items.reduce(function (sum, it) { return sum + it.value; }, 0) * this.stats().sellTotal;
+    var result = { winner: winner, price: winner < 0 ? 0 : price, inside: inside, containerId: p.container.id,
+                   rivalId: winner < 0 ? null : a.rivals[winner].id, gen: p.gen };
+    this.s.bidding = null;
+    this.replaceLot(b.lot);
+    this.emit("passed", result);
+    this.save();
+    return result;
   };
 
   Game.prototype.takeScrapPile = function () {
     if (!this.safetyNetAvailable()) return false;
     var c = this.d.containerById[this.d.config.safetyNet.containerId];
     var g = R.generate(this.d, c, this.stats().luck, this.nextSeed());
-    this.startContainer(c, g, [], 0);
+    this.startContainer(c, g, [], 0, 0);
     this.save();
     return true;
   };
 
-  Game.prototype.startContainer = function (c, gen, peek, serial) {
+  Game.prototype.startContainer = function (c, gen, peek, serial, paid) {
     var n = c.cols * c.rows, hp = [], i;
     for (i = 0; i < n; i++) hp.push(c.rustHp);
     this.s.current = {
-      containerId: c.id, price: c.price, serial: serial, gen: gen, hp: hp,
+      containerId: c.id, price: paid, guide: c.price, serial: serial, gen: gen, hp: hp,
       itemState: gen.items.map(function () { return { revealed: false, sold: false, kept: false }; }),
       tally: null, done: false
     };
@@ -174,6 +259,10 @@
     if (forCollection) st.kept = true;
     this.emit("reveal", { index: idx, item: it, def: this.d.itemById[it.id], sale: sale,
                           forCollection: forCollection, silent: silent });
+    if (cur.price > 0) {
+      this.contractProgress("find_rarity", { rarity: it.rarity });
+      this.contractProgress("condition", { condition: it.condition });
+    }
     if (!forCollection && it.rarity === "junk" && this.stats().autoSellJunk) this.sellItem(idx, true);
     this.checkDone();
   };
@@ -220,6 +309,10 @@
     this.s.history.unshift(tally);
     this.s.history = this.s.history.slice(0, 8);
     this.emit("done", tally);
+    if (cur.price > 0) {
+      this.contractProgress("open_class", { containerId: cur.containerId });
+      this.contractProgress("profit", { profit: tally.profit });
+    }
   };
 
   /* Auto-scraper: called by the UI loop with a target chooser for cosmetics. */
@@ -281,6 +374,7 @@
       }
     });
     this.s.current = null;
+    if (filed.length) this.contractProgress("file", { count: filed.length });
     this.emit("finished", { sold: sold, filed: filed, completed: newlyCompleted });
     this.save();
     return { sold: sold, filed: filed, completed: newlyCompleted };
@@ -290,6 +384,58 @@
     this.s.money += amount;
     this.s.lifetime += amount;
     this.s.totalEarned += amount;
+  };
+
+  // ------------------------------------------------------------ port contracts
+  Game.prototype.bestClass = function () {
+    var a = this.availableContainers();
+    return a[a.length - 1];
+  };
+
+  Game.prototype.fillContracts = function () {
+    var cfg = this.d.contracts;
+    if (!this.s.contracts) this.s.contracts = [];
+    while (this.s.contracts.length < cfg.active) {
+      var taken = this.s.contracts.map(function (c) { return c.tpl; });
+      var free = cfg.templates.filter(function (t) { return taken.indexOf(t.id) === -1; });
+      var rng = new R.Mulberry32(this.nextSeed());
+      var t = free[Math.floor(rng.next() * free.length)];
+      var best = this.bestClass();
+      this.s.contracts.push({
+        tpl: t.id, progress: 0, n: t.n, classId: best.id,
+        amount: t.profitGuideMult ? R.niceRound(best.price * t.profitGuideMult) : 0,
+        reward: R.niceRound(best.price * t.rewardGuideMult)
+      });
+    }
+  };
+
+  Game.prototype.contractText = function (c) {
+    var t = this.d.contracts.templates.filter(function (x) { return x.id === c.tpl; })[0];
+    return t.text.replace("{n}", c.n).replace("{class}", this.d.containerById[c.classId].name)
+      .replace("{amount}", "$" + Math.round(c.amount).toLocaleString("en-US"));
+  };
+
+  Game.prototype.contractProgress = function (type, detail) {
+    var self = this, rarOrder = R.RARITIES, changed = false;
+    (this.s.contracts || []).forEach(function (c) {
+      var t = self.d.contracts.templates.filter(function (x) { return x.id === c.tpl; })[0];
+      if (t.type !== type) return;
+      var hit = false;
+      if (type === "find_rarity") hit = rarOrder.indexOf(detail.rarity) >= rarOrder.indexOf(t.rarity);
+      else if (type === "condition") hit = detail.condition === t.condition;
+      else if (type === "open_class") hit = detail.containerId === c.classId;
+      else if (type === "profit") hit = detail.profit >= c.amount;
+      else if (type === "file") hit = true;
+      if (hit) { c.progress = Math.min(c.n, c.progress + (detail.count || 1)); changed = true; }
+    });
+    if (!changed) return;
+    var done = this.s.contracts.filter(function (c) { return c.progress >= c.n; });
+    if (done.length) {
+      this.s.contracts = this.s.contracts.filter(function (c) { return c.progress < c.n; });
+      done.forEach(function (c) { self.earn(c.reward); self.emit("contract", { contract: c, text: self.contractText(c) }); });
+      this.fillContracts();
+    }
+    this.emit("contracts");
   };
 
   // ------------------------------------------------------------ upgrades
@@ -306,12 +452,13 @@
 
   Game.prototype.buyUpgrade = function (id) {
     var u = this.d.upgradeById[id], info = this.upgradeInfo(u);
+    if (this.s.bidding) return false;   // cash is committed while you're bidding
     if (info.maxed || !info.unlocked || !this.canAfford(info.cost)) return false;
     var beforeAccess = this.stats().tierAccess;
     this.s.money -= info.cost;
     this.s.levels[id] = info.level + 1;
     this.emit("upgrade", { upgrade: u, level: info.level + 1 });
-    if (this.stats().tierAccess !== beforeAccess) this.refreshLots();
+    if (this.stats().tierAccess !== beforeAccess && !this.s.bidding) this.refreshLots();
     else if (u.stat === "luck" || u.stat === "peekBonus") this.emit("lots");
     this.save();
     return true;
@@ -342,12 +489,14 @@
 
   Game.prototype.prestige = function () {
     var gain = this.prestigePreview();
-    if (gain < 1 || this.s.current) return false;
+    if (gain < 1 || this.s.current || this.s.bidding) return false;
     this.s.stars += gain;
     this.s.money = this.d.config.startMoney;
     this.s.lifetime = 0;
     this.s.levels = {};
+    this.s.contracts = [];
     this.refreshLots();
+    this.fillContracts();
     this.emit("prestige", { gain: gain, stars: this.s.stars });
     this.save();
     return true;
@@ -368,6 +517,7 @@
       if (!s || s.version !== 1) return false;
       this.s = s;
       if (!this.s.lots || !this.s.lots.length) this.refreshLots();
+      this.fillContracts();
       return true;
     } catch (e) { return false; }
   };

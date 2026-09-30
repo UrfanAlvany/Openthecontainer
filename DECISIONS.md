@@ -109,3 +109,26 @@ moving; Urfan can overrule at any time), **Superseded**.
   generator in Python and JavaScript, checked by a parity test.
 - **Why:** Zero setup on Urfan's laptop (double-click `web/index.html`), and simulator
   results apply to the real game exactly.
+
+### D-014 — Rusty Boxes sell at a fixed price; auctions start with Standard 20ft
+- **Date:** 2026-09-30 · **By:** Claude (from the simulator) · **Status:** Working
+- **What:** The starter class is bought at the yard gate for a fixed price. Live bidding
+  against rivals begins with the first Auction License (Standard 20ft).
+- **Why:** Bidding on every $95 box slowed the first minutes badly (the first Haggling
+  purchase slipped from 0:28 to 7:30 in simulation), and new players should learn scraping
+  before bidding. It also gives the "Auction License" upgrade a literal meaning.
+
+### D-015 — Rival bidders: fixed private limits, honest tells, and "what you missed"
+- **Date:** 2026-09-30 · **By:** Claude · **Status:** Working
+- **What:** Each lot's rivals get private limits from the lot's seed and what they can see
+  through the base door crack. Their visible mood (confident / neutral / nervous / out)
+  comes from real headroom. When you walk away, you see what they paid and what was inside.
+- **Why:** D-007 (readable, beatable rivals). Showing the contents after passing turns the
+  auction into a skill you can learn, instead of a black box.
+
+### D-016 — Port contracts: two optional goals, no timers
+- **Date:** 2026-09-30 · **By:** Claude · **Status:** Working
+- **What:** Two contracts on offer at all times, with rewards fixed when offered
+  (0.2–0.35× the guide price of your best class). No expiry, no penalty.
+- **Why:** Gives saving stretches a short-term goal. Simulated median worst gap fell from
+  8.8 to 6.4 min. The research's "session clock/quota" idea, adapted without a fail state.

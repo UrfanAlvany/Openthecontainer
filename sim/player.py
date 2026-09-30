@@ -9,8 +9,8 @@ Policy (deliberately simple; real players are at least this smart):
   3. Keep the first copy of every collection item; sell everything else.
   4. Prestige when the reputation gain reaches `prestige_at_stars` (optional).
 """
-from engine import (Mulberry32, compute_stats, crew_income_per_sec, expected_value, generate,
-                    open_time, prestige_stars, requirements_met, upgrade_cost)
+from engine import (RARITIES, Mulberry32, auction_outcome, nice_round, auction_setup, compute_stats, crew_income_per_sec,
+                    expected_value, generate, open_time, prestige_stars, requirements_met, upgrade_cost)
 
 # Upgrades that only change information/feel. The simulated player buys them only
 # when they are cheap relative to cash, like a real player would.
@@ -39,6 +39,48 @@ class Run:
         self.purchase_times = []
         self.profit_by_tier = {}
         self._last_sample = -1e9
+        self.auctions = 0
+        self.auctions_won = 0
+        self.paid_ratio = []
+        self.contracts = []
+        self.contract_income = 0.0
+        self.fill_contracts()
+
+    # -------------------------------------------------------------- port contracts (same rules as the game)
+    def fill_contracts(self):
+        cfg = self.d.contracts
+        s = self.stats() if hasattr(self, "levels") else None
+        access = s["tierAccess"] if s else 1
+        best = [c for c in self.d.buyable_containers() if c["tier"] <= access][-1]
+        while len(self.contracts) < cfg["active"]:
+            taken = [c["tpl"]["id"] for c in self.contracts]
+            free = [t for t in cfg["templates"] if t["id"] not in taken]
+            t = free[int(self.rng.next() * len(free))]
+            self.contracts.append({"tpl": t, "progress": 0, "class": best["id"],
+                                   "amount": nice_round(best["price"] * t.get("profitGuideMult", 0)),
+                                   "reward": nice_round(best["price"] * t["rewardGuideMult"])})
+
+    def contract_event(self, kind, **kw):
+        changed = False
+        for c in self.contracts:
+            t = c["tpl"]
+            if t["type"] != kind:
+                continue
+            hit = (kind == "find_rarity" and RARITIES.index(kw["rarity"]) >= RARITIES.index(t["rarity"])) or \
+                  (kind == "condition" and kw["condition"] == t["condition"]) or \
+                  (kind == "open_class" and kw["container"] == c["class"]) or \
+                  (kind == "profit" and kw["profit"] >= c["amount"]) or kind == "file"
+            if hit:
+                c["progress"] = min(t["n"], c["progress"] + kw.get("count", 1))
+                changed = True
+        if not changed:
+            return 0.0
+        done = [c for c in self.contracts if c["progress"] >= c["tpl"]["n"]]
+        self.contracts = [c for c in self.contracts if c["progress"] < c["tpl"]["n"]]
+        paid = sum(c["reward"] for c in done)
+        if done:
+            self.fill_contracts()
+        return paid
 
     # -------------------------------------------------------------- helpers
     def stats(self):
@@ -124,14 +166,33 @@ class Run:
             s = self.stats()
             self.sample(s)
             c = self.container_choice(s)
-            dt = open_time(self.d, c, s) / self.human_speed
-            self.money -= c["price"]
             seed = int(self.rng.next() * 2**32)
             g = generate(self.d, c, s["luck"], seed)
+            paid = c["price"]
+            if paid > 0 and c["sale"] == "auction":
+                # Bid at auction up to (a little over) expected value; walk away otherwise.
+                a = self.d.auction
+                setup = auction_setup(self.d, c, g, seed)
+                value = expected_value(self.d, c["id"], s["luck"]) * s["sellTotal"]
+                won, price = auction_outcome(setup, min(self.money, value * a["simOverbid"]))
+                self.t += a["simSecondsPerLot"] / self.human_speed
+                self.auctions += 1
+                if not won:
+                    continue
+                paid = price
+                self.auctions_won += 1
+                self.paid_ratio.append(price / c["price"])
+            dt = open_time(self.d, c, s) / self.human_speed
+            self.money -= paid
             found = 0.0
             kept_value = 0.0
+            bonus = 0.0
+            filed = 0
             for it in g["items"]:
                 r = it["rarity"]
+                if paid > 0:
+                    bonus += self.contract_event("find_rarity", rarity=r)
+                    bonus += self.contract_event("condition", condition=it["condition"])
                 if r not in self.first_rarity:
                     self.first_rarity[r] = self.t + dt
                     if r in ("epic", "legendary"):
@@ -139,18 +200,26 @@ class Run:
                 col = self.d.collection_of_item.get(it["id"])
                 if col and it["id"] not in self.collected:
                     self.collected.add(it["id"])
+                    filed += 1
                     self._check_collection(col)
                     kept_value += it["value"] * s["sellTotal"]
                     continue
                 found += it["value"] * s["sellTotal"]
+            if paid > 0:
+                bonus += self.contract_event("open_class", container=c["id"])
+                bonus += self.contract_event("profit", profit=found + kept_value - paid)
+            if filed:
+                bonus += self.contract_event("file", count=filed)
+            self.contract_income += bonus
+            found += bonus
             crew = crew_income_per_sec(self.d, s) * dt
             self.t += dt
             self.money += found + crew
             self.lifetime += found + crew
             self.containers_opened[c["id"]] = self.containers_opened.get(c["id"], 0) + 1
-            if c["price"] > 0:
+            if paid > 0:
                 # Same definition as the in-game tally: kept items count at their value.
-                self.profit_by_tier.setdefault(c["id"], []).append(found + kept_value - c["price"])
+                self.profit_by_tier.setdefault(c["id"], []).append(found + kept_value - paid)
 
             gain = prestige_stars(self.d, self.lifetime)
             if gain >= 3 and not any(k == "prestige3" for (_t, k, _d) in self.events):
@@ -175,6 +244,8 @@ class Run:
         self.money = float(self.d.config["startMoney"])
         self.lifetime = 0.0
         self.levels = {}
+        self.contracts = []
+        self.fill_contracts()
 
 
 def expected_ratio(data, container_id, stats):
