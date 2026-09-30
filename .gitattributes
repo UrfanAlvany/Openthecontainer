@@ -1,0 +1,19 @@
+* text=auto eol=lf
+
+# Unity YAML assets
+*.unity   text eol=lf merge=unityyamlmerge
+*.prefab  text eol=lf merge=unityyamlmerge
+*.asset   text eol=lf merge=unityyamlmerge
+*.meta    text eol=lf
+
+# Binary
+*.png  binary
+*.jpg  binary
+*.gif  binary
+*.webp binary
+*.wav  binary
+*.mp3  binary
+*.ogg  binary
+*.ttf  binary
+*.otf  binary
+*.woff2 binary
