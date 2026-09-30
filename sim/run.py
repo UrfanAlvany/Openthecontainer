@@ -129,6 +129,13 @@ def container_table(data):
 
 
 # ------------------------------------------------------------------ report (inline SVG)
+def short_money(v):
+    for div, suffix in ((1e12, "T"), (1e9, "B"), (1e6, "M"), (1e3, "K")):
+        if v >= div:
+            return f"${v / div:g}{suffix}"
+    return f"${v:g}"
+
+
 def svg_money_chart(runs, minutes, width=760, height=300):
     pad_l, pad_b, pad_t, pad_r = 60, 30, 10, 10
     step = 30
@@ -161,7 +168,7 @@ def svg_money_chart(runs, minutes, width=760, height=300):
     for e in range(0, int(lmax) + 1):
         yy = y(10 ** e)
         parts.append(f'<line x1="{pad_l}" x2="{width - pad_r}" y1="{yy:.1f}" y2="{yy:.1f}" class="grid"/>')
-        parts.append(f'<text x="{pad_l - 6}" y="{yy + 4:.1f}" class="tick" text-anchor="end">${10 ** e:,.0f}</text>')
+        parts.append(f'<text x="{pad_l - 6}" y="{yy + 4:.1f}" class="tick" text-anchor="end">{short_money(10 ** e)}</text>')
     for mnt in range(0, minutes + 1, 15):
         xx = x(mnt * 60)
         parts.append(f'<text x="{xx:.1f}" y="{height - 8}" class="tick" text-anchor="middle">{mnt}m</text>')

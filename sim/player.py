@@ -129,6 +129,7 @@ class Run:
             seed = int(self.rng.next() * 2**32)
             g = generate(self.d, c, s["luck"], seed)
             found = 0.0
+            kept_value = 0.0
             for it in g["items"]:
                 r = it["rarity"]
                 if r not in self.first_rarity:
@@ -139,6 +140,7 @@ class Run:
                 if col and it["id"] not in self.collected:
                     self.collected.add(it["id"])
                     self._check_collection(col)
+                    kept_value += it["value"] * s["sellTotal"]
                     continue
                 found += it["value"] * s["sellTotal"]
             crew = crew_income_per_sec(self.d, s) * dt
@@ -147,7 +149,8 @@ class Run:
             self.lifetime += found + crew
             self.containers_opened[c["id"]] = self.containers_opened.get(c["id"], 0) + 1
             if c["price"] > 0:
-                self.profit_by_tier.setdefault(c["id"], []).append(found - c["price"])
+                # Same definition as the in-game tally: kept items count at their value.
+                self.profit_by_tier.setdefault(c["id"], []).append(found + kept_value - c["price"])
 
             gain = prestige_stars(self.d, self.lifetime)
             if gain >= 3 and not any(k == "prestige3" for (_t, k, _d) in self.events):

@@ -8,7 +8,7 @@ import sys
 import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from engine import Data, Mulberry32, generate, upgrade_cost  # noqa: E402
+from engine import Data, Mulberry32, expected_value, generate, upgrade_cost  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -31,6 +31,12 @@ class ParityTest(unittest.TestCase):
             py = generate(self.d, self.d.container_by_id[g["c"]], g["luck"], g["seed"])
             self.assertEqual(py["cells"], g["cells"], g["c"])
             self.assertEqual([[i["id"], i["x"], i["y"], i["condition"]] for i in py["items"]], g["items"], g["c"])
+
+    def test_expected_values_match(self):
+        # Crew income depends on these, so JS and Python must agree exactly.
+        for c in self.d.containers:
+            self.assertEqual([expected_value(self.d, c["id"], 0), expected_value(self.d, c["id"], 5)],
+                             self.js["ev"][c["id"]], c["id"])
 
     def test_costs_match(self):
         for u in self.d.upgrades:

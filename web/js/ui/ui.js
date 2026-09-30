@@ -170,6 +170,7 @@
 
   // ------------------------------------------------------------------ stage: auction
   UI.prototype.renderStage = function () {
+    if (this.stopScrape) this.stopScrape();
     this.stage.innerHTML = "";
     if (this.g.s.current) this.renderYard();
     else this.renderAuction();
@@ -249,7 +250,7 @@
     var self = this, g = this.g, cur = g.s.current, c = this.d.containerById[cur.containerId];
     var st = g.stats();
     this.paidEl = h("span", { class: "v", text: money(cur.price) });
-    this.foundEl = h("span", { class: "v", text: money(cur.found) });
+    this.foundEl = h("span", { class: "v", text: money(g.foundValue()) });
     this.profitEl = h("span", { class: "v" });
     var head = h("div", { class: "stage-head" }, [
       h("h2", { text: c.name }),
@@ -299,13 +300,15 @@
     this.updateMeter();
     this.updateGlints();
     cur.gen.items.forEach(function (it, idx) { if (cur.itemState[idx].revealed) self.addFind(idx, false); });
-    if (cur.done) this.showTally({ paid: cur.price, found: cur.found, profit: cur.found - cur.price, containerId: cur.containerId }, true);
+    if (cur.done && cur.tally) this.showTally(cur.tally, true);
   };
 
   UI.prototype.decorateItem = function (idx, el) {
     var cur = this.g.s.current, it = cur.gen.items[idx], ist = cur.itemState[idx];
-    var sale = it.value * this.g.stats().sellTotal;
-    if (!el.querySelector(".tag")) el.appendChild(h("span", { class: "tag", text: money(sale) }));
+    var sale = ist.sold ? ist.soldFor : it.value * this.g.stats().sellTotal;
+    var tag = el.querySelector(".tag");
+    if (!tag) el.appendChild(h("span", { class: "tag", text: money(sale) }));
+    else tag.textContent = money(sale);
     var k = el.querySelector(".keep");
     if (ist.kept && !k) el.appendChild(h("span", { class: "keep", title: "Kept for a collection", text: "📌" }));
     if (!ist.kept && k) k.remove();
@@ -314,8 +317,9 @@
 
   UI.prototype.updateMeter = function () {
     var cur = this.g.s.current; if (!cur || !this.foundEl) return;
-    this.foundEl.textContent = money(cur.found);
-    var p = cur.found - cur.price;
+    var found = this.g.foundValue();
+    this.foundEl.textContent = money(found);
+    var p = found - cur.price;
     this.profitEl.textContent = (p >= 0 ? "+" : "") + money(p);
     this.profitEl.className = "v " + (p >= 0 ? "gain" : "loss");
   };
@@ -342,7 +346,7 @@
   };
 
   UI.prototype.bindScrape = function () {
-    var self = this, grid = this.gridEl, down = false, lastCell = -1, holdTimer = null;
+    var self = this, grid = this.gridEl, down = false, lastCell = -1, holdTimer = null, activeId = null;
     var repeatMs = this.d.config.scraping.holdRepeatMs;
     function cellAt(e) {
       var r = grid.getBoundingClientRect(), c = self.d.containerById[self.g.s.current.containerId];
@@ -357,23 +361,27 @@
     }
     function stopHold() { if (holdTimer) { clearInterval(holdTimer); holdTimer = null; } }
     grid.addEventListener("pointerdown", function (e) {
+      if (down && e.pointerId !== activeId) return;   // one scraping finger at a time
       A.unlock();
-      down = true; grid.setPointerCapture(e.pointerId);
+      down = true; activeId = e.pointerId;
+      try { grid.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
       lastCell = cellAt(e); hit(lastCell, e);
       stopHold();
       holdTimer = setInterval(function () { if (down) hit(lastCell, self.lastPointer ? { clientX: self.lastPointer.x, clientY: self.lastPointer.y } : e); }, repeatMs);
       e.preventDefault();
     });
     grid.addEventListener("pointermove", function (e) {
-      if (!down) return;
+      if (!down || e.pointerId !== activeId) return;
       var cell = cellAt(e);
       self.lastPointer = { x: e.clientX, y: e.clientY };
       if (cell !== lastCell) { lastCell = cell; hit(cell, e); }
     });
-    function up() { down = false; stopHold(); }
+    function up(e) { if (e && e.pointerId != null && e.pointerId !== activeId) return; down = false; activeId = null; stopHold(); }
     grid.addEventListener("pointerup", up);
     grid.addEventListener("pointercancel", up);
     grid.addEventListener("lostpointercapture", up);
+    doc.addEventListener("pointerup", up);
+    this.stopScrape = function () { down = false; stopHold(); doc.removeEventListener("pointerup", up); };
   };
 
   UI.prototype.tileCenter = function (cell) {
@@ -439,6 +447,7 @@
       case "start":
         this.renderStage();
         this.renderTop();
+        this.renderPanel();
         break;
       case "tile": {
         var t = this.tileEls && this.tileEls[p.cell]; if (!t) break;
@@ -461,6 +470,7 @@
       case "reveal": this.onReveal(p); break;
       case "sold":
         if (this.itemEls && this.itemEls[p.index]) this.decorateItem(p.index, this.itemEls[p.index]);
+        this.updateMeter();
         this.renderTop(); this.bumpMoney();
         if (p.auto && this.g.s.current && !this.g.s.current.done) {
           var pc = this.itemCenter(p.index);
@@ -487,9 +497,8 @@
         break;
       case "keep":
         if (this.itemEls) this.itemEls.forEach(function (el, i) { self.decorateItem(i, el); });
-        if (this.stage.querySelector(".tally") && this.g.s.current) {
-          var cur = this.g.s.current;
-          this.showTally({ paid: cur.price, found: cur.found, profit: cur.found - cur.price, containerId: cur.containerId }, true);
+        if (this.stage.querySelector(".tally") && this.g.s.current && this.g.s.current.tally) {
+          this.showTally(this.g.s.current.tally, true);
         }
         break;
     }
@@ -557,6 +566,7 @@
         h("div", {}, [h("span", { class: "k", text: "Profit" }), h("span", { class: "v " + cls, style: "color:var(--" + cls + ")", text: (profit >= 0 ? "+" : "") + money(profit) })])
       ]),
       h("div", { class: "verdict", text: verdict }),
+      h("div", { class: "cashline", text: self.cashLine() }),
       keeps.childNodes.length ? h("div", { class: "peek-label", text: "Collection items" }) : null,
       keeps.childNodes.length ? keeps : null,
       h("button", { class: "btn wide", id: "tally-continue", onclick: function () { A.cash(); g.finishContainer(); } }, ["Sell the rest & back to the auction"])
@@ -569,6 +579,12 @@
       else A.cash();
     }
     var btn = card.querySelector("#tally-continue"); if (btn) btn.focus({ preventScroll: true });
+  };
+
+  UI.prototype.cashLine = function () {
+    var g = this.g, cash = g.cashValue(), kept = g.foundValue() - cash;
+    if (kept < 0.005) return "All of it goes to your cash: " + money(cash) + ".";
+    return "Cash in: " + money(cash) + " · kept for collections: " + money(kept) + " (their value counts in Found).";
   };
 
   // ------------------------------------------------------------------ panel
@@ -609,19 +625,35 @@
         self.pane.appendChild(row);
       });
     });
-    var gain = g.prestigePreview(), armed = false;
-    var pbtn = h("button", { class: "btn ghost wide", disabled: gain >= 1 && !g.s.current ? null : "disabled", onclick: function () {
-      if (!armed) { armed = true; pbtn.textContent = "Tap again: reset cash & upgrades for +" + gain + " ★"; return; }
+    var pbtn = h("button", { class: "btn ghost wide", onclick: function () {
+      var gain = g.prestigePreview();
+      if (gain < 1 || g.s.current) return;
+      if (!self.prestigeArmed) {
+        self.prestigeArmed = true;
+        pbtn.textContent = "Tap again: reset cash & upgrades for +" + gain + " ★";
+        clearTimeout(self.prestigeDisarm);
+        self.prestigeDisarm = setTimeout(function () { self.prestigeArmed = false; self.updatePrestige(); }, 4000);
+        return;
+      }
+      self.prestigeArmed = false;
       g.prestige();
-    } }, [gain >= 1 ? "Sell the business for +" + gain + " ★" : "Not worth selling yet"]);
+    } });
     this.prestigeBtn = pbtn;
+    this.prestigeArmed = false;
     this.pane.appendChild(h("div", { class: "prestige" }, [
       h("h4", { text: "Sell the business" }),
       h("div", { text: "Start over with a better reputation. Each ★ adds +" + Math.round(this.d.config.prestige.sellBonusPerStar * 100) + "% to everything you sell, forever. Collections are kept." }),
-      h("div", { class: "d", text: "Earned this business: " + money(g.s.lifetime) + ". Next ★ at " + money(Math.pow(gain + 1, 2) * this.d.config.prestige.earningsPerStarSquared) + "." }),
+      h("div", { class: "d", text: "Earned this business: " + money(g.s.lifetime) + ". Next ★ at " + money(Math.pow(g.prestigePreview() + 1, 2) * this.d.config.prestige.earningsPerStarSquared) + "." }),
       pbtn
     ]));
     this.updateAffordability();
+  };
+
+  UI.prototype.updatePrestige = function () {
+    var b = this.prestigeBtn; if (!b || this.prestigeArmed) return;
+    var g = this.g, gain = g.prestigePreview();
+    b.disabled = gain < 1 || !!g.s.current;
+    b.textContent = gain < 1 ? "Not worth selling yet" : g.s.current ? "Finish this container first" : "Sell the business for +" + gain + " ★";
   };
 
   UI.prototype.updateGoal = function () {
@@ -642,6 +674,7 @@
       o.btn.disabled = info.maxed || !info.unlocked || !g.canAfford(info.cost);
     });
     this.updateGoal();
+    this.updatePrestige();
   };
 
   UI.prototype.renderCollections = function () {

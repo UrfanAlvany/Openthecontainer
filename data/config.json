@@ -211,5 +211,6 @@
   "safetyNet": {
     "comment": "When the player cannot afford any container, the free scrap pile is offered.",
     "containerId": "scrap_pile"
-  }
+  },
+  "evSamples": 2000
 }

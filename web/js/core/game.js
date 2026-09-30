@@ -83,7 +83,7 @@
     return { container: c, gen: g, peek: peek };
   };
 
-  Game.prototype.canAfford = function (amount) { return this.s.money >= amount - 1e-9; };
+  Game.prototype.canAfford = function (amount) { return this.s.money >= amount; };
 
   Game.prototype.safetyNetAvailable = function () {
     var cheapest = Math.min.apply(null, this.availableContainers().map(function (c) { return c.price; }));
@@ -97,6 +97,7 @@
     if (!this.canAfford(p.container.price)) return false;
     this.s.money -= p.container.price;
     this.startContainer(p.container, p.gen, p.peek, lot.serial);
+    this.save();
     this.s.lots.splice(index, 1);
     var avail = this.availableContainers().slice().reverse();
     this.s.lots.push({ containerId: avail[Math.min(this.s.lots.length, avail.length - 1)].id,
@@ -110,6 +111,7 @@
     var c = this.d.containerById[this.d.config.safetyNet.containerId];
     var g = R.generate(this.d, c, this.stats().luck, this.nextSeed());
     this.startContainer(c, g, [], 0);
+    this.save();
     return true;
   };
 
@@ -119,7 +121,7 @@
     this.s.current = {
       containerId: c.id, price: c.price, serial: serial, gen: gen, hp: hp,
       itemState: gen.items.map(function () { return { revealed: false, sold: false, kept: false }; }),
-      found: 0, done: false
+      tally: null, done: false
     };
     this.emit("start", { container: c });
     for (i = 0; i < peek.length; i++) this.damage(peek[i], c.rustHp, true);
@@ -165,7 +167,6 @@
     st.revealed = true;
     var it = cur.gen.items[idx];
     var sale = it.value * this.stats().sellTotal;
-    cur.found += sale;
     this.s.stats.found[it.rarity]++;
     var colId = this.d.collectionOfItem[it.id];
     var keptHere = cur.gen.items.some(function (other, j) { return j !== idx && other.id === it.id && cur.itemState[j].kept; });
@@ -179,13 +180,41 @@
 
   Game.prototype.itemState = function (idx) { return this.s.current.itemState[idx]; };
 
+  /* Value of everything revealed so far: what sold items actually fetched, plus what the
+   * rest would fetch now. Kept (collection) items count at their sale value. */
+  Game.prototype.foundValue = function () {
+    var cur = this.s.current; if (!cur) return 0;
+    var mult = this.stats().sellTotal, total = 0;
+    for (var i = 0; i < cur.gen.items.length; i++) {
+      var st = cur.itemState[i];
+      if (!st.revealed) continue;
+      total += st.sold ? st.soldFor : cur.gen.items[i].value * mult;
+    }
+    return total;
+  };
+
+  /* Cash the player actually gets from this container if they finish now. */
+  Game.prototype.cashValue = function () {
+    var cur = this.s.current; if (!cur) return 0;
+    var mult = this.stats().sellTotal, total = 0;
+    for (var i = 0; i < cur.gen.items.length; i++) {
+      var st = cur.itemState[i];
+      if (!st.revealed) continue;
+      if (st.sold) total += st.soldFor;
+      else if (!st.kept) total += cur.gen.items[i].value * mult;
+    }
+    return total;
+  };
+
   Game.prototype.checkDone = function () {
     var cur = this.s.current;
     if (cur.done) return;
     for (var i = 0; i < cur.hp.length; i++) if (cur.hp[i] > 0) return;
     cur.done = true;
-    var tally = { containerId: cur.containerId, paid: cur.price, found: cur.found,
-                  profit: cur.found - cur.price, serial: cur.serial };
+    var found = this.foundValue();
+    var tally = { containerId: cur.containerId, paid: cur.price, found: found,
+                  profit: found - cur.price, serial: cur.serial };
+    cur.tally = tally;
     this.s.stats.opened++;
     if (cur.price > 0 && (!this.s.stats.best || tally.profit > this.s.stats.best.profit)) this.s.stats.best = tally;
     this.s.history.unshift(tally);
@@ -212,7 +241,7 @@
     if (!st.revealed || st.sold) return 0;
     var it = cur.gen.items[idx];
     var sale = it.value * this.stats().sellTotal;
-    st.sold = true; st.kept = false;
+    st.sold = true; st.kept = false; st.soldFor = sale;
     this.earn(sale);
     this.emit("sold", { index: idx, sale: sale, auto: !!auto });
     return sale;

@@ -18,6 +18,9 @@
     else game.load();
     var ui = new DS.UI(game, document.getElementById("app"));
     ui.loop();
+    // Save when the tab is hidden or closed (mobile browsers may kill background tabs).
+    document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") game.save(); });
+    root.addEventListener("pagehide", function () { game.save(); });
     root.dockside = { game: game, ui: ui };   // handy for debugging and tests
     if (root.claude && root.claude.hot && root.claude.hot.snapshot) {
       root.claude.hot.snapshot(function () { return { state: game.s }; });

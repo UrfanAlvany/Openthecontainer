@@ -19,5 +19,7 @@ for (const c of d.containers) {
     }
   }
 }
+out.ev = {};
+for (const c of d.containers) out.ev[c.id] = [R.expectedValue(d, c.id, 0), R.expectedValue(d, c.id, 5)];
 for (const u of d.upgrades) out.costs[u.id] = Array.from({ length: u.maxLevel }, (_, l) => R.upgradeCost(u, l));
 process.stdout.write(JSON.stringify(out));

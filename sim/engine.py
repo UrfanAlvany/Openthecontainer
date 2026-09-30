@@ -175,12 +175,10 @@ def open_time(data, container, stats):
     return hits / rate + sc["simOverheadSec"]
 
 
-_EV_SAMPLES = 3000
-
-
-def expected_value(data, container_id, luck, samples=_EV_SAMPLES):
-    """Mean raw value (before sell multipliers) of a container. Deterministic."""
-    return _ev_cached(id(data), data, container_id, luck, samples)
+def expected_value(data, container_id, luck, samples=None):
+    """Mean raw value (before sell multipliers) of a container. Deterministic, and equal
+    to the JavaScript value (same seeds, same sample count from config.evSamples)."""
+    return _ev_cached(id(data), data, container_id, luck, samples or data.config["evSamples"])
 
 
 @lru_cache(maxsize=None)
@@ -189,7 +187,8 @@ def _ev_cached(_data_key, data, container_id, luck, samples):
     total = 0.0
     for s in range(samples):
         g = generate(data, c, luck, 1_000_003 + s)
-        total += sum(it["value"] for it in g["items"])
+        for it in g["items"]:
+            total += it["value"]
     return total / samples
 
 

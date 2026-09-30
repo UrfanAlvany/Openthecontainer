@@ -61,10 +61,10 @@ about 40–80 containers and 10–20 upgrades.
 |---|---:|---|---:|---:|---:|---|
 | Dockside Scrap Pile | $0 | 3×3 | 1 | $30 | free | 88 / 12 / 0 / 0 / 0 |
 | Rusty Box | $95 | 4×3 | 2 | $110 | 1.16× | 67 / 28 / 5 / 0.45 / 0.06 |
-| Standard 20ft | $630 | 6×5 | 3 | $634 | 1.01× | 65 / 30 / 4.6 / 0.7 / 0.12 |
-| Premium 40ft | $3,900 | 7×5 | 5 | $3,671 | 0.94× | 63 / 31 / 5.1 / 0.75 / 0.12 |
-| Sealed Military | $51,000 | 8×6 | 9 | $45,822 | 0.90× | 62 / 32 / 4.9 / 0.73 / 0.11 |
-| Legendary Ship Cargo | $560,000 | 9×6 | 14 | $472,204 | 0.84× | 62 / 32 / 5.3 / 0.75 / 0.11 |
+| Standard 20ft | $630 | 6×5 | 3 | $632 | 1.00× | 65 / 30 / 4.6 / 0.7 / 0.12 |
+| Premium 40ft | $3,900 | 7×5 | 5 | $3,742 | 0.96× | 63 / 31 / 5.1 / 0.75 / 0.12 |
+| Sealed Military | $51,000 | 8×6 | 9 | $45,645 | 0.89× | 62 / 32 / 4.9 / 0.73 / 0.11 |
+| Legendary Ship Cargo | $560,000 | 9×6 | 14 | $471,624 | 0.84× | 62 / 32 / 5.3 / 0.75 / 0.11 |
 
 - **Expected value** is before sell bonuses. Profit comes from upgrades (Haggling, Lucky
   Charm, collections, reputation stars). Each new class opens a little below break-even,
@@ -154,8 +154,8 @@ From `python3 sim/run.py --seeds 60` (60 simulated players, 120 minutes each):
 |---|---:|---|---|
 | First upgrade | 0:28 | ≤ 1:00 | ✅ |
 | Starter EV / price, no upgrades | 1.16× | 1.05–1.20× | ✅ |
-| Starter EV / price after 3 Haggling | 1.51× | ≥ 1.05× | ✅ |
-| Starter containers that turn a profit | 56% | 35–70% | ✅ |
+| Starter EV / price after 3 Haggling | 1.50× | ≥ 1.05× | ✅ |
+| Starter containers that turn a profit | 57% | 35–70% | ✅ |
 | First Epic | 2:22 | 2–15 min | ✅ |
 | First Legendary | 10:44 | 10–25 min | ✅ |
 | Standard unlocked | 4:04 | 1.5–7 min | ✅ |

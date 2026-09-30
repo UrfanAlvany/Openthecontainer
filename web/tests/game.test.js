@@ -21,19 +21,40 @@ function scrapeAll(g) {
 let passed = 0;
 function test(name, fn) { fn(); passed++; console.log("ok -", name); }
 
-test("buy, scrape, finish: money accounting adds up", () => {
-  const g = new Game(raw, { seed: 1 });
-  const start = g.s.money;
-  assert.ok(g.buyLot(0));
-  const price = g.s.current.price;
-  scrapeAll(g);
-  assert.ok(g.s.current.done);
+test("buy, scrape, finish: cash change equals the tally's cash line", () => {
+  for (let seed = 1; seed < 60; seed++) {
+    const g = new Game(raw, { seed });
+    const start = g.s.money;
+    assert.ok(g.buyLot(0));
+    const price = g.s.current.price;
+    scrapeAll(g);
+    const cur = g.s.current;
+    assert.ok(cur.done && cur.tally);
+    const cash = g.cashValue();
+    assert.ok(Math.abs(cur.tally.found - g.foundValue()) < 1e-9);
+    assert.ok(Math.abs(cur.tally.profit - (cur.tally.found - price)) < 1e-9);
+    g.finishContainer();
+    assert.ok(Math.abs(g.s.money - (start - price + cash)) < 1e-6, "money mismatch at seed " + seed);
+  }
+});
+
+test("buying Haggling mid-container keeps Found equal to what you get", () => {
+  const g = new Game(raw, { seed: 3 });
+  g.s.levels.auto_sell_junk = 1;          // some items sell during scraping
+  g.s.money += 1000;
+  const beforeBuy = g.s.money;
+  g.buyLot(0);
   const cur = g.s.current;
-  const keptValue = cur.gen.items.reduce((sum, it, i) => sum + (cur.itemState[i].kept ? it.value * g.stats().sellTotal : 0), 0);
-  const res = g.finishContainer();
-  assert.ok(Math.abs(g.s.money - (start - price + cur.found - keptValue)) < 1e-6, "money mismatch");
-  assert.strictEqual(g.s.current, null);
-  assert.ok(res.filed.length >= 0);
+  const afterBuy = beforeBuy - cur.price;   // peeked junk may auto-sell inside buyLot
+  for (let i = 0; i < 6; i++) g.scrape(cur.hp.findIndex(h => h > 0));
+  const upgradeCost = 100;   // Haggling level 1 (data/upgrades.json)
+  assert.ok(g.buyUpgrade("haggle"));
+  scrapeAll(g);
+  cur.itemState.forEach(st => { st.kept = false; });   // sell everything
+  const found = g.foundValue();
+  g.finishContainer();
+  const received = g.s.money - afterBuy + upgradeCost;
+  assert.ok(Math.abs(received - found) < 1e-6, `received ${received} vs found ${found}`);
 });
 
 test("only one copy of an item is kept for a collection", () => {

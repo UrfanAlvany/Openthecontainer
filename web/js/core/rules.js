@@ -140,7 +140,7 @@
 
   var evCache = {};
   function expectedValue(d, containerId, luck, samples) {
-    samples = samples || 800;
+    samples = samples || d.config.evSamples;
     var key = containerId + "|" + luck + "|" + samples;
     if (evCache[key] != null) return evCache[key];
     var c = d.containerById[containerId], total = 0;
