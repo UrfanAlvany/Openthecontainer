@@ -144,3 +144,23 @@ moving; Urfan can overrule at any time), **Superseded**.
   (CC BY 3.0, credited in-game and in the README).
 - **Why:** The dashboard look and emoji read as "AI-made toy". This is still prototype art;
   final art direction (style, characters, item illustrations) is Phase 5 and Urfan's call.
+
+### D-018 — Drop the mystery-container game
+- **Date:** 2026-10-02 · **By:** Urfan · **Status:** Decided
+- **What:** The container/auction/scrape game (Dockside) is shelved. The web prototype and
+  research stay in the repo as reference.
+- **Why:** Urfan: "this is like just pressing opening box, and so what?" and "even our idea is
+  not something interesting". Opening had no decisions or risk, and progression only
+  changed the numbers. The 2026-10-03 research (`reports/Why job simulator games are fun.md`)
+  confirms that a balanced economy is not evidence of fun.
+
+### D-019 — New lane: first-person job/business simulator in Unity; pick the concept by fun test
+- **Date:** 2026-10-03 · **By:** Urfan (lane) → Claude (method) · **Status:** Working, concept pending Urfan
+- **What:** A first-person job sim in Unity, inspired by Internet Cafe Simulator 2 as a
+  structural model, not as the theme (internet cafe is a faded lane). Three candidates
+  are in `CONCEPTS.md`; the lead candidate is "Second Hand" (restore and flip junk). Each
+  surviving candidate gets a ≤5-day greybox toy test before any production work.
+- **Why:** The research says to choose the verb first, then the ladder, then the theme,
+  that every level must change the work, and that the player's own skill must stay
+  necessary (Urfan's progression insight, refined). Price target moves to $14.99–19.99 for a
+  15–25 h arc (supersedes D-010's under-$10 advice for this lane).
