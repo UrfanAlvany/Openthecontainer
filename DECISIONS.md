@@ -164,3 +164,20 @@ moving; Urfan can overrule at any time), **Superseded**.
   that every level must change the work, and that the player's own skill must stay
   necessary (Urfan's progression insight, refined). Price target moves to $14.99–19.99 for a
   15–25 h arc (supersedes D-010's under-$10 advice for this lane).
+
+### D-020 — Drop "Second Hand"; build a first-person dealer shop (Internet Cafe Sim world + Dealer's Life core)
+- **Date:** 2026-10-04 · **By:** Urfan · **Status:** Decided (direction); prototype in progress
+- **What:** The restoration toy is stopped after one day. The new direction is the pawn/dealer
+  concept: a first-person shop you walk around and build up (Internet Cafe Simulator 2),
+  whose core action is inspecting items and haggling with customers who sell and buy
+  (Dealer's Life). The next prototype includes the progression ladder from the start.
+- **Why:** Urfan, after playing the toy: "we clean something and sell, so? There is no
+  what's next, what you will buy, how it gets easier." Restoration is also crowding fast:
+  The Repair House flopped (Mixed, 124 reviews) and at least six more are announced (Rust &
+  Reveal, Rust & Shine, Reshine and others). Urfan's own favourites are Internet Cafe
+  Simulator and Dealer's Life. Competition alone is not a reason to stop (Urfan); the pawn
+  lane has 20+ announced games, so ours must be clearly the best 3D Dealer's Life. Edge from
+  research: keep the player's skill (spotting fakes, reading people) necessary all game,
+  because Dealer's Life died once its upgrades replaced that skill.
+- **Process lesson:** check Steam's "coming soon" competitors for every concept before
+  building anything.
