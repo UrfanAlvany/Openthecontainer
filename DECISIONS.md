@@ -181,3 +181,24 @@ moving; Urfan can overrule at any time), **Superseded**.
   because Dealer's Life died once its upgrades replaced that skill.
 - **Process lesson:** check Steam's "coming soon" competitors for every concept before
   building anything.
+
+### D-021 — Drop the pawn shop; next concept is a 1920s speakeasy, built with bought art packs
+- **Date:** 2026-10-17 · **By:** Urfan · **Status:** Decided (direction); competitor and art checks running
+- **What:** The dealer shop prototype (Unity project SimGame, `Assets/Prototypes/Dealer/`,
+  later extended by Codex) is shelved. The new direction is a first-person 1920s Prohibition
+  speakeasy: a legal café out front by day, a secret bar in the back at night. You buy liquor
+  from smugglers by haggling (fakes are poison), serve customers, grow the place, bribe the
+  police, survive raids and deal with rival gangs. Prototypes from now on use bought 3D art
+  packs (Unity Asset Store, about $50–150 to start, approved by Urfan) instead of
+  code-generated boxes.
+- **Why:** Urfan played the dealer shop and did not like the idea itself, found it boring
+  to play, and said it looks or feels cheap. His reference games are still Internet Cafe
+  Simulator and Dealer's Life. Claude's read: our version had neither game's pull. It lacked
+  Internet Cafe Simulator's build-a-big-place-from-nothing with a dangerous illegal side, and
+  Dealer's Life's memorable characters and surprises. Primitive art made every prototype look
+  like a toy. The speakeasy puts the legal/illegal tension at the centre, and the 1920s
+  setting has strong style.
+- **Rejected alternatives:** a bigger version of the pawn shop, and a phone repair shop with
+  a black-market side.
+- **Process:** check Steam competitors, released and coming soon, before building (D-020
+  lesson). Pick one consistent art style before the first prototype.
