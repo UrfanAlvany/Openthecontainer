@@ -202,3 +202,19 @@ moving; Urfan can overrule at any time), **Superseded**.
   a black-market side.
 - **Process:** check Steam competitors, released and coming soon, before building (D-020
   lesson). Pick one consistent art style before the first prototype.
+
+### D-022 — Art style: semi-realistic (style C), starting with a ~$78 look test
+- **Date:** 2026-10-18 · **By:** Urfan · **Status:** Decided
+- **What:** The speakeasy uses a semi-realistic look, like Internet Cafe Simulator 2,
+  Supermarket Simulator and Saloon Simulator. It means real proportions and photo-based
+  textures, built from Unity Asset Store packs, with one lighting recipe across all scenes.
+  The first purchase is a look test: Gentleman Modular ($29, 1920s men, Humanoid rig,
+  URP, Unity 6), Old Private Casino ($19) and Irish Pub ($29.99, Built-in, needs converting to
+  URP). One bar corner gets built and screenshotted before the full kit (about $280) is bought.
+- **Why:** Urfan rejected the Synty POLYGON look ("lego guys"). The picture board
+  (`research_notes/Speakeasy art styles/`) compared four styles. Realistic (D) costs
+  $430–750, risks uncanny faces, and its best tool (Character Creator) needs Windows. The
+  polished-cartoon style (B) has no 1920s outfits. Much of a "commercial" look comes from
+  lighting and materials, which we control.
+- **Open gap:** 1920s women's outfits. Test one Evin 3D "Mafia Girl" ($54) next, or use
+  Character Creator or Daz once the licence terms are confirmed in writing.
